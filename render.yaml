@@ -3,7 +3,7 @@ services:
     name: greenfield-inventory-system
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: python wsgi.py
+    startCommand: python ./wsgi.py
     envVars:
       - key: FLASK_ENV
         value: production
