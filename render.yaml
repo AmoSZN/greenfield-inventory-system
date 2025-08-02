@@ -1,0 +1,38 @@
+{
+  "services": [
+    {
+      "type": "web",
+      "name": "greenfield-inventory-system",
+      "env": "python",
+      "plan": "starter",
+      "buildCommand": "pip install -r requirements.txt",
+      "startCommand": "python wsgi.py",
+      "envVars": [
+        {
+          "key": "DEBUG",
+          "value": "False"
+        },
+        {
+          "key": "SECRET_KEY",
+          "generateValue": true
+        },
+        {
+          "key": "PARADIGM_API_KEY",
+          "value": "nVPsQFBteV&GEd7*8n0%RliVjksag8"
+        },
+        {
+          "key": "PARADIGM_USERNAME",
+          "value": "web_admin"
+        },
+        {
+          "key": "PARADIGM_PASSWORD",
+          "value": "ChangeMe#123!"
+        },
+        {
+          "key": "PARADIGM_BASE_URL",
+          "value": "https://greenfieldapi.para-apps.com"
+        }
+      ]
+    }
+  ]
+}

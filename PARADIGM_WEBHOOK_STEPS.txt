@@ -1,0 +1,71 @@
+============================================================
+EXACT PARADIGM WEBHOOK SETUP STEPS
+============================================================
+
+STEP 1: GET YOUR WEBHOOK URL
+----------------------------
+First, you need your ngrok URL. In a NEW terminal window, type:
+.\ngrok.exe http 5001
+
+You'll see something like:
+Forwarding   https://abc123.ngrok-free.app -> http://localhost:5001
+
+Copy the https URL (like https://abc123.ngrok-free.app)
+
+STEP 2: LOG INTO PARADIGM
+-------------------------
+1. Open your web browser
+2. Go to your Paradigm login page
+3. Login with:
+   Username: mattamundson@greenfieldmetalsales.com
+   Password: Morrison216!!
+
+STEP 3: FIND WEBHOOK SETTINGS
+-----------------------------
+Look for ONE of these (different Paradigm versions):
+- Settings → Webhooks
+- Configuration → API → Webhooks  
+- Admin → Integrations → Webhooks
+- Setup → External Connections → Webhooks
+
+STEP 4: ADD NEW WEBHOOK
+-----------------------
+Click "Add New Webhook" or "New" or "+" button
+
+Fill in these EXACT values:
+
+Name: Label Printer
+URL: [YOUR-NGROK-URL]/paradigm-webhook
+     Example: https://abc123.ngrok-free.app/paradigm-webhook
+Type: SalesOrder  (IMPORTANT: Not "Order" - must be "SalesOrder")
+Method: POST
+Format: JSON
+Active: Yes / Enabled / True
+
+If asked for "Events" or "Triggers":
+✓ Create
+✓ Update
+
+If asked for Headers:
+Content-Type: application/json
+
+STEP 5: SAVE AND TEST
+--------------------
+1. Click Save
+2. Look for a "Test" button and click it
+3. OR create a new Sales Order in Paradigm
+
+============================================================
+TROUBLESHOOTING
+============================================================
+If you can't find webhook settings:
+- Call Paradigm support: Ask "Where do I configure webhooks?"
+- Look under API settings
+- Check administrator or developer sections
+
+If the test fails:
+- Make sure ngrok is still running (don't close that window!)
+- Make sure the URL ends with /paradigm-webhook
+- Check Windows Firewall isn't blocking
+
+============================================================

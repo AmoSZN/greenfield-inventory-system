@@ -1,0 +1,2 @@
+order_number,order_date,order_id,customer_name,customer_address,customer_city,customer_state,customer_zip,total_items,total_quantity,total_weight,item_product_code,item_description,item_quantity,item_unit,po_number,ship_date,items_list
+SO-2024-002,2024-01-18,SO-2024-002,International Advanced Manufacturing Solutions & Engineering Services Corporation LLC,456 Technology Drive Suite 200,San Francisco,CA,94105,1,100,210.0,ALUMINUM-ANGLE-2X2,Aluminum Angle 2x2x1/8,100,FT,PURCHASE-ORDER-2024-JANUARY-METALS-001,2024-01-30,1. ALUMINUM-ANGLE-2X2 - Aluminum Angle 2x2x1/8 - 100 FT

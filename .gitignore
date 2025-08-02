@@ -1,0 +1,60 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Local development
+.env
+.env.local
+.env.development
+
+# Logs
+*.log
+logs/
+Logs/
+
+# Database (will be recreated in production)
+*.db-journal
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+
+# Archive and backup folders
+Archive/
+Backup/
+BarcodeScanner/
+Documentation/
+ErrorReports/
+GitHubPackage/
+InventoryScannerApp/
+modules/
+Oracle_JDK-24/
+
+# Large files
+*.exe
+*.zip
+ngrok*
+
+# Test reports
+test_report_*.json
+
+# Excel files (too large)
+*.xlsx

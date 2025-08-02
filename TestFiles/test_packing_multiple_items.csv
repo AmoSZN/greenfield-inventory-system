@@ -1,0 +1,6 @@
+order_number,order_date,order_id,customer_name,customer_address,customer_city,customer_state,customer_zip,total_items,total_quantity,total_weight,item_product_code,item_description,item_quantity,item_unit,po_number,ship_date,items_list
+SO-2024-003,2024-01-18,SO-2024-003,Construction Plus,789 Builder Lane,Dallas,TX,75201,5,490,10026.750000000002,STEEL-BEAM-4X4,Steel Beam 4x4x10 Hot Rolled,15,EA,CONST-2024-001,2024-02-01,"1. STEEL-BEAM-4X4 - Steel Beam 4x4x10 Hot Rolled - 15 EA
+2. STEEL-ANGLE-3X3 - Steel Angle 3x3x1/4 - 200 FT
+3. STEEL-TUBE-2X2 - Steel Square Tube 2x2x1/8 - 150 FT
+4. STEEL-PLATE-0.25 - Steel Plate 1/4 inch 4x8 - 50 EA
+5. ALUMINUM-TUBE-1X1 - Aluminum Square Tube 1x1x1/8 - 75 FT"

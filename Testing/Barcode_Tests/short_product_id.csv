@@ -1,0 +1,2 @@
+OrderNumber,ProductID,Description,Quantity,Length,Weight,TotalLength,TotalQuantity,TotalWeight
+SO-2024-004,A1,Short Product Code Test,5,12,25.5,60,5,127.5

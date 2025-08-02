@@ -1,0 +1,2 @@
+order_number,order_date,order_id,customer_name,customer_address,customer_city,customer_state,customer_zip,total_items,total_quantity,total_weight,item_product_code,item_description,item_quantity,item_unit,po_number,ship_date,items_list
+SO-2024-006,2024-01-18,SO-2024-006,Quick Order Co,1 Main St,Houston,TX,77001,1,1,10.0,STEEL-001,Steel Product,1,EA,,2024-01-20,1. STEEL-001 - Steel Product - 1 EA

@@ -1,0 +1,2 @@
+OrderNumber,ProductID,Description,Quantity,Length,Weight,TotalLength,TotalQuantity,TotalWeight
+SO-2024-006,SteelBeam4x4MixedCase,Mixed Case Product ID Test,8,96,200.0,768,8,1600.0

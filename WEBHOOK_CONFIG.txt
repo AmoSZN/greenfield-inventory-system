@@ -1,0 +1,33 @@
+============================================================
+EXACT WEBHOOK SETTINGS FOR PARADIGM
+============================================================
+
+When you add the webhook in Paradigm, use these EXACT settings:
+
+Name: Label Printer
+
+URL: [YOUR-NGROK-URL]/paradigm-webhook
+Example: https://abc123.ngrok.io/paradigm-webhook
+
+Type: SalesOrder (NOT "Order" - must be "SalesOrder")
+
+Method: POST
+
+Headers (if asked):
+- Content-Type: application/json
+
+Events (if asked):
+- ✓ Create
+- ✓ Update
+
+Active: Yes / Enabled
+
+============================================================
+IMPORTANT NOTES:
+============================================================
+1. The URL must end with /paradigm-webhook
+2. Use "SalesOrder" not "Order" for the type
+3. Keep the ngrok window open while testing
+4. The ngrok URL changes each time you restart it
+
+============================================================ 

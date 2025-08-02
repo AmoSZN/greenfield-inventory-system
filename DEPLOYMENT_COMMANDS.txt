@@ -1,0 +1,46 @@
+EXACT DEPLOYMENT STEPS - WHAT I WOULD DO RIGHT NOW
+====================================================
+
+1. OPEN POWERSHELL AS ADMINISTRATOR
+   - Right-click PowerShell → Run as Administrator
+
+2. NAVIGATE TO PROJECT
+   cd "C:\Users\mattm\OneDrive\Greenfield Metal Sales\Barcode Scanner"
+
+3. RUN PRE-DEPLOYMENT CHECK
+   .\PRE_DEPLOYMENT_CHECKLIST.bat
+   
+   Expected output:
+   - All 5 checks should pass
+   - If NSSM missing, it will auto-download
+
+4. INSTALL AS WINDOWS SERVICE
+   .\install_as_service.bat
+   
+   This will:
+   - Stop any existing service
+   - Install "GreenfieldLabelService"
+   - Set to auto-start on boot
+   - Start the service immediately
+
+5. VERIFY SERVICE IS RUNNING
+   Get-Service GreenfieldLabelService
+   
+   Should show: Status = Running
+
+6. TEST THE SERVICE
+   Invoke-RestMethod -Uri "http://localhost:5001/test-print"
+   
+   Should print a test label
+
+7. CHECK SERVICE LOGS
+   Get-EventLog -LogName Application -Source GreenfieldLabelService -Newest 10
+
+8. SET UP MONITORING (Run in separate PowerShell)
+   while ($true) {
+       $status = Get-Service GreenfieldLabelService
+       Write-Host "$(Get-Date -Format 'HH:mm:ss') - Service: $($status.Status)"
+       Start-Sleep -Seconds 30
+   }
+
+THAT'S IT - SYSTEM IS DEPLOYED! 

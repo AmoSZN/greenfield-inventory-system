@@ -1,0 +1,11 @@
+ProductID,Quantity,Description,Notes
+1010AG,250,Aluminum Grade A - Updated via bulk,Test batch 1
+1015AW,750,Aluminum Wire 15mm - Bulk update,Test batch 1
+1020B,500,Bronze Sheet Type B - Inventory sync,Test batch 1
+1025AW,300,Aluminum Wire 25mm - Bulk test,Test batch 1
+1030C,450,Copper Plate Type C - Updated,Test batch 1
+1035CU,600,Copper Unit 35 - Bulk import,Test batch 1
+1040D,200,Steel Grade D - Test update,Test batch 1
+1045DX,350,Steel Deluxe 45 - Bulk sync,Test batch 1
+1050E,400,Electrode Type E - Updated,Test batch 1
+1055EX,550,Electrode Extra - Bulk test,Test batch 1

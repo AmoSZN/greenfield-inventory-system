@@ -1,0 +1,28 @@
+============================================================
+WHO TO CALL FOR HELP
+============================================================
+
+FOR PARADIGM USERNAME/PASSWORD:
+- Your IT department
+- Whoever set up Paradigm for you
+- Try: admin@greenfieldmetalsales.com
+- Or check your email for "Paradigm login" or "welcome"
+
+FOR PARADIGM WEBHOOK SETTINGS:
+- Paradigm support: support@para-apps.com
+- Ask: "How do I add a webhook for sales orders?"
+- Tell them: "I need to send orders to an external system"
+
+FOR TECHNICAL ISSUES:
+- The files that matter:
+  * test_paradigm_auth.py (tests your login)
+  * QUICK_START.ps1 (main menu)
+  * webhook_simple_print.py (the printer service)
+  * DO_THIS_NOW.txt (simple instructions)
+
+WHAT TO TELL THEM:
+"I have a label printing service running on port 5001.
+I need to configure Paradigm to send sales orders to it.
+My service URL is [my ngrok address]/paradigm-webhook"
+
+============================================================ 

@@ -1,0 +1,2 @@
+product_code,description,quantity,unit,weight,order_number,customer_name,ship_date,barcode
+STEEL-001,Steel Product,1 EA,EA,10.0,SO-2024-006,Quick Order Co,2024-01-20,STEEL-001

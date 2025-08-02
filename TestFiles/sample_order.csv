@@ -1,0 +1,2 @@
+﻿orderNumber,customerPO,shipDate,carrier,trackingNumber,billToCompany,billingAddress,billToCity,billToState,billToZIP,shipToCompany,shippingAddress,shipToCity,shipToState,shipToZIP,qrCodeData,barcodeData
+12345,PO-2024-001,2024-01-15,FedEx Ground,7489274892374,ABC Manufacturing,123 Industrial Way,Minneapolis,MN,55401,XYZ Corporation,456 Commerce Drive,Chicago,IL,60601,"{""orderNumber"":""12345""}",ORD-12345-1

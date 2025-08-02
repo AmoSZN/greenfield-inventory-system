@@ -1,0 +1,17 @@
+{
+  "sync_date": "2025-07-11T13:31:50.259029",
+  "total_products": 3,
+  "categories": {
+    "Structural Steel": 2,
+    "Aluminum": 1
+  },
+  "suppliers": {
+    "ABC Steel Supply": 2,
+    "Premium Metals": 1
+  },
+  "locations": {
+    "A1-B1-C1": 1,
+    "A1-B2-C1": 1,
+    "B1-B1-C1": 1
+  }
+}

@@ -1,0 +1,2 @@
+OrderNumber,ProductID,Description,Quantity,Length,Weight,TotalLength,TotalQuantity,TotalWeight
+SO-2024-002,STEEL-BEAM-4X4/6-GRADE#2,Steel Beam 4x4/6 Grade #2 (Special Characters),10,100,1500.0,1000,10,15000.0

@@ -1,0 +1,2 @@
+order_number,order_date,order_id,customer_name,customer_address,customer_city,customer_state,customer_zip,total_items,total_quantity,total_weight,item_product_code,item_description,item_quantity,item_unit,po_number,ship_date,items_list
+SO-2024-005,2024-01-18,SO-2024-005,O'Malley & Sons Manufacturing,"123 ""Quality"" Street, Unit #5",New York,NY,10001,1,50,765.0,STEEL-ANGLE-L-3X3,"Steel L-Angle 3""x3""x1/4"" (Hot-Rolled)",50,EA,PO#2024-001,2024-01-28,"1. STEEL-ANGLE-L-3X3 - Steel L-Angle 3""x3""x1/4"" (Hot-Rolled) - 50 EA"

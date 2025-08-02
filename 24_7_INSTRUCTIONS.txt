@@ -1,0 +1,58 @@
+GREENFIELD INVENTORY SYSTEM - 24/7 SETUP INSTRUCTIONS
+=====================================================
+
+🚀 TO START THE SYSTEM:
+   Double-click: START_INVENTORY_SYSTEM.bat
+
+🌐 ACCESS URLS:
+   Local Computer: http://localhost:8000
+   Network Access: http://192.168.12.78:8000
+   Mobile Devices: http://192.168.12.78:8000
+
+🔄 FOR AUTO-START ON WINDOWS BOOT:
+   1. Right-click START_INVENTORY_SYSTEM.bat
+   2. Select "Create shortcut"
+   3. Cut the shortcut (Ctrl+X)
+   4. Press Win+R, type: shell:startup
+   5. Paste the shortcut there (Ctrl+V)
+
+📋 SYSTEM FEATURES:
+   ✅ Search 39,193 products
+   ✅ Update descriptions (syncs to Paradigm)
+   ⚠️  Update quantities (local tracking only)
+   ✅ Bulk CSV import/export
+   ✅ Complete update history
+   ✅ Natural language commands
+
+🗣️ NATURAL LANGUAGE EXAMPLES:
+   • "Add 50 units to product 1015B"
+   • "Set description for 1015B to New Description"
+   • "Increase inventory for 1025AW by 100 units"
+   • "Update 1020B quantity to 200"
+
+🛑 TO STOP THE SYSTEM:
+   Close the command window or press Ctrl+C
+
+📞 SUPPORT:
+   System runs on: C:\Python313\python.exe
+   Script location: C:\Users\mattm\OneDrive\Greenfield Metal Sales\Barcode Scanner\inventory_system_24_7.py
+   Data folder: C:\Users\mattm\OneDrive\Greenfield Metal Sales\Barcode Scanner\Data\
+
+🎯 QUICK TEST:
+   1. Start the system
+   2. Open http://localhost:8000
+   3. Search for "1015B"
+   4. Try updating the description
+   5. Try natural language: "Add 25 units to product 1015B"
+
+🔧 TROUBLESHOOTING:
+   • If port 8000 is busy: Change port in inventory_system_24_7.py
+   • If Python not found: Update path in START_INVENTORY_SYSTEM.bat
+   • If database errors: Delete Data/inventory.db to reset
+
+✅ SYSTEM STATUS: FULLY OPERATIONAL
+   - Core Functions: ✅ Working
+   - Paradigm Sync: ✅ Working (descriptions)
+   - Natural Language: ✅ Working
+   - Bulk Operations: ✅ Working
+   - Error Handling: ✅ Improved

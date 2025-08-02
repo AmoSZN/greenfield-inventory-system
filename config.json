@@ -1,0 +1,43 @@
+{
+  "paradigm": {
+    "api_base_url": "https://greenfieldapi.para-apps.com/api",
+    "api_key": "nVPsQFBteV&GEd7*8n0%RliVjksag8",
+    "bearer_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VyTmFtZSI6IndlYl9hZG1pbiIsIlN0clBhcmFkaWdtVXNlciI6IndlYl9hZG1pbiIsIlN0ckZpcnN0TmFtZSI6IldlYiIsIlN0ckxhc3ROYW1lIjoiQWRtaW4iLCJleHAiOjE3NTQ3NjUyMDQsImlzcyI6IlBhcmFkaWdtIiwiYXVkIjoiUGFyYWRpZ20ifQ.-dpjG3oYq97Z4Pj04t_kvYUNEHyowluFmbDAvef3IiE",
+    "username": "web_admin",
+    "password": "ChangeMe#123!"
+  },
+  "bartender": {
+    "executable_path": "C:/Program Files/Seagull/BarTender 11.4/BarTend.exe",
+    "templates_path": "C:/BarTenderIntegration/Templates/",
+    "packing_list_template": "PackingList.btw",
+    "product_label_template": "Paradigm_Item_Label.btw"
+  },
+  "paths": {
+    "data_path": "C:/BarTenderIntegration/Data/",
+    "archive_path": "C:/BarTenderIntegration/Archive/",
+    "error_path": "C:/BarTenderIntegration/ErrorReports/",
+    "logs_path": "C:/BarTenderIntegration/Logs/"
+  },
+  "webhook": {
+    "host": "0.0.0.0",
+    "port": 5001,
+    "secret": "28DHqczoJRqMCz-kJPkTS89fM3LCJqpEmOZLsj4e73Y"
+  },
+  "zebra": {
+    "printer_name": "Zebra ZT610",
+    "scanner_model": "TC200J"
+  },
+  "service": {
+    "name": "GreenfieldLabelService",
+    "display_name": "Greenfield Metal Sales Label Printing Service",
+    "description": "Automated label printing service for Paradigm ERP integration"
+  },
+  "ai": {
+    "enabled": true,
+    "model": "inventory-optimizer-v1",
+    "batch_size": 100,
+    "prediction_threshold": 0.8,
+    "anomaly_detection": true,
+    "reorder_automation": false
+  }
+}

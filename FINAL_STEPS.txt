@@ -1,0 +1,45 @@
+============================================================
+YOU'RE 10 MINUTES FROM DONE!
+============================================================
+
+✅ DONE: Your Paradigm login works!
+✅ DONE: Your label printer works!
+
+Just 2 things left:
+
+============================================================
+THING 1: NGROK (5 minutes)
+============================================================
+1. Type: .\QUICK_START.ps1
+2. Press: 8
+3. Press: Enter
+4. A black window opens with a web address
+5. COPY that address (looks like: https://abc123.ngrok.io)
+6. Keep that window open!
+
+============================================================
+THING 2: PARADIGM WEBHOOK (5 minutes)  
+============================================================
+1. Open Paradigm in your browser
+2. Look for: Settings or Configuration
+3. Find: Webhooks or API or Integrations
+4. Click: Add New Webhook
+5. Fill in:
+   - Name: Label Printer
+   - URL: [your ngrok address]/paradigm-webhook
+   - Type: SalesOrder
+   - Method: POST
+6. Save it!
+
+============================================================
+TEST IT!
+============================================================
+Create a sales order in Paradigm.
+Your label should print automatically!
+
+If it doesn't work:
+- Make sure ngrok window is still open
+- Check: Get-Content "C:\BarTenderIntegration\Logs\webhook_20250730.log" -Tail 20
+
+THAT'S IT! YOU'RE DONE! 🎉
+============================================================ 

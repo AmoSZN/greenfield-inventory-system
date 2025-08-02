@@ -1,0 +1,49 @@
+============================================================
+DO THESE 3 THINGS RIGHT NOW!
+============================================================
+
+THING 1: Find Your Paradigm Password
+------------------------------------
+Type: python test_paradigm_auth.py
+Press: n (to use current credentials)
+
+If it says "User Not Authorized":
+- Go to https://greenfieldapi.para-apps.com
+- Try logging in with your normal username/password
+- Use THAT username/password in the test
+
+Keep trying until it says "SUCCESS!"
+
+
+THING 2: Get Ngrok (5 minutes)
+------------------------------
+Type: .\QUICK_START.ps1
+Press: 8
+Press: Enter
+
+A black window will open with a web address.
+COPY THAT ADDRESS! (looks like: https://abc123.ngrok.io)
+
+
+THING 3: Add Webhook in Paradigm (5 minutes)
+--------------------------------------------
+1. Open Paradigm in your web browser
+2. Look for: Settings or Admin or Configuration
+3. Find: Webhooks or Integrations or API
+4. Click: Add New or Create Webhook
+5. Fill in:
+   Name: Label Printer
+   URL: [your ngrok address]/paradigm-webhook
+   Type: SalesOrder
+   Method: POST
+6. Save it!
+
+DONE! Create an order and watch it print!
+
+============================================================
+NEED HELP?
+- Your label printer IS working (we tested it)
+- You just need the right Paradigm login
+- Ngrok is like call forwarding for computers
+- The webhook tells Paradigm where to send orders
+============================================================ 

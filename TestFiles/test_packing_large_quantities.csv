@@ -1,0 +1,3 @@
+order_number,order_date,order_id,customer_name,customer_address,customer_city,customer_state,customer_zip,total_items,total_quantity,total_weight,item_product_code,item_description,item_quantity,item_unit,po_number,ship_date,items_list
+SO-2024-004,2024-01-18,SO-2024-004,Mega Construction Corp,1000 Industrial Complex,Austin,TX,78701,2,17500,169500.0,STEEL-BEAM-4X4,Steel Beam 4x4x10 Hot Rolled,2500,EA,MEGA-2024-STEEL-ORDER,2024-02-15,"1. STEEL-BEAM-4X4 - Steel Beam 4x4x10 Hot Rolled - 2500 EA
+2. STEEL-ANGLE-3X3 - Steel Angle 3x3x1/4 - 15000 FT"

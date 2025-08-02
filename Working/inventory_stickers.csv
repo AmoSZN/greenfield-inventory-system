@@ -1,0 +1,11 @@
+SKU,Description,Location,Category,Supplier,LastUpdated
+STEEL-BEAM-4X4,Steel Beam 4x4x10 Hot Rolled,A1-B2-C3,Structural Steel,ABC Steel Supply,2025-07-11
+STEEL-ANGLE-3X3,Steel Angle 3x3x1/4,A1-B2-C4,Structural Steel,ABC Steel Supply,2025-07-11
+STEEL-TUBE-2X2,Steel Square Tube 2x2x1/8,A1-B3-C1,Tubing,XYZ Metals,2025-07-11
+STEEL-PLATE-0.25,Steel Plate 1/4 inch,A2-B1-C1,Plate Steel,ABC Steel Supply,2025-07-11
+ALUMINUM-ANGLE-2X2,Aluminum Angle 2x2x1/8,B1-B1-C1,Aluminum,Premium Metals,2025-07-11
+STEEL-ROUND-1,Steel Round Bar 1 inch,A1-B4-C1,Round Bar,ABC Steel Supply,2025-07-11
+STEEL-FLAT-2X0.25,Steel Flat Bar 2x1/4,A1-B4-C2,Flat Bar,ABC Steel Supply,2025-07-11
+ALUMINUM-TUBE-1X1,Aluminum Square Tube 1x1x1/8,B1-B2-C1,Aluminum,Premium Metals,2025-07-11
+STEEL-CHANNEL-3,Steel Channel 3 inch,A2-B2-C1,Channel,ABC Steel Supply,2025-07-11
+STAINLESS-PLATE-0.125,Stainless Steel Plate 1/8 inch,C1-B1-C1,Stainless Steel,Specialty Alloys,2025-07-11

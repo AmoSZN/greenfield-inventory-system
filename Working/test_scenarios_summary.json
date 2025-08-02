@@ -1,0 +1,72 @@
+{
+  "test_date": "2025-07-11T13:12:38.808916",
+  "total_scenarios": 6,
+  "scenarios": [
+    {
+      "name": "Simple Order",
+      "description": "Basic order with standard data",
+      "order_id": "SO-2024-001",
+      "customer_name": "ABC Manufacturing Inc",
+      "item_count": 1,
+      "total_quantity": 25,
+      "test_focus": [
+        "Standard order processing"
+      ]
+    },
+    {
+      "name": "Long Customer Name",
+      "description": "Customer with very long company name",
+      "order_id": "SO-2024-002",
+      "customer_name": "International Advanced Manufacturing Solutions & Engineering Services Corporation LLC",
+      "item_count": 1,
+      "total_quantity": 100,
+      "test_focus": [
+        "Long customer names"
+      ]
+    },
+    {
+      "name": "Multiple Items",
+      "description": "Order with many different products",
+      "order_id": "SO-2024-003",
+      "customer_name": "Construction Plus",
+      "item_count": 5,
+      "total_quantity": 490,
+      "test_focus": [
+        "Multiple items"
+      ]
+    },
+    {
+      "name": "Large Quantities",
+      "description": "Order with very large quantities",
+      "order_id": "SO-2024-004",
+      "customer_name": "Mega Construction Corp",
+      "item_count": 2,
+      "total_quantity": 17500,
+      "test_focus": [
+        "Large quantities"
+      ]
+    },
+    {
+      "name": "Special Characters",
+      "description": "Order with special characters and symbols",
+      "order_id": "SO-2024-005",
+      "customer_name": "O'Malley & Sons Manufacturing",
+      "item_count": 1,
+      "total_quantity": 50,
+      "test_focus": [
+        "Special characters"
+      ]
+    },
+    {
+      "name": "Minimal Data",
+      "description": "Order with minimal required data only",
+      "order_id": "SO-2024-006",
+      "customer_name": "Quick Order Co",
+      "item_count": 1,
+      "total_quantity": 1,
+      "test_focus": [
+        "Missing optional data"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+﻿{
+  "orderNumber": "12345",
+  "customerPO": "PO-2024-001",
+  "shipDate": "2024-01-15",
+  "carrier": "FedEx Ground",
+  "trackingNumber": "7489274892374",
+  "packageCount": 1,
+  "totalPackages": 2,
+  "weight": "45.5 lbs",
+  "printDateTime": "2024-01-10 14:30:00",
+  "billToCompany": "ABC Manufacturing",
+  "billingAddress": "123 Industrial Way",
+  "billToCity": "Minneapolis",
+  "billToState": "MN",
+  "billToZIP": "55401",
+  "shipToCompany": "XYZ Corporation", 
+  "shippingAddress": "456 Commerce Drive",
+  "shipToCity": "Chicago",
+  "shipToState": "IL",
+  "shipToZIP": "60601",
+  "qrCodeData": "{\"orderNumber\":\"12345\",\"customerPO\":\"PO-2024-001\",\"shipDate\":\"2024-01-15\",\"trackingURL\":\"https://track.carrier.com/7489274892374\"}",
+  "barcodeData": "ORD-12345-1",
+  "totalQuantity": 15,
+  "products": [
+    {
+      "productId": "STEEL-4X8-025",
+      "description": "Steel Sheet 4' x 8' x 0.25\"",
+      "quantity": 5
+    },
+    {
+      "productId": "ALU-ANGLE-2X2",
+      "description": "Aluminum Angle 2\" x 2\" x 0.25\"",
+      "quantity": 10
+    }
+  ]
+}

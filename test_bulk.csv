@@ -1,0 +1,4 @@
+ProductID,Quantity,Description,Notes
+1010AG,150,Test Bulk Update Description,Bulk test 1
+1015AW,600,Another Test Update,Bulk test 2
+1020B,300,Third Test Update,Bulk test 3

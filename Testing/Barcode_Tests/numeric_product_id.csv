@@ -1,0 +1,2 @@
+OrderNumber,ProductID,Description,Quantity,Length,Weight,TotalLength,TotalQuantity,TotalWeight
+SO-2024-005,123456789,Numeric Product ID Test,15,48,75.0,720,15,1125.0
