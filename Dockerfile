@@ -9,6 +9,6 @@ COPY . .
 
 RUN mkdir -p Data
 
-EXPOSE 8000
+EXPOSE 10000
 
-CMD ["python", "wsgi.py"]
+CMD ["python", "app.py"]
