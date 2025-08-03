@@ -83,6 +83,8 @@ def init_database():
         conn.close()
         
         logger.info("✅ Database initialized successfully!")
+        logger.info(f"📊 Database ready at: {os.path.abspath(db_path)}")
+        
         return True
         
     except Exception as e:
@@ -143,5 +145,5 @@ if __name__ == '__main__':
             channel_timeout=120
         )
     except ImportError:
-        print("⚠️ Waitress not available, using Flask dev server")
+        logger.warning("⚠️ Waitress not available, using Flask dev server")
         app.run(host='0.0.0.0', port=port, debug=False)
