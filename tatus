@@ -1,0 +1,5 @@
+[33m6196dfe[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m Fix Dockerfile: Use app.py and correct port 10000
+[33m55e728a[m DEFINITIVE FIX: Create app.py as standard entry point for Render
+[33m431c093[m CRITICAL FIX: Rename main_app.py to avoid Render confusion, explicit wsgi.py path
+[33mf22e32d[m Fix deployment: Add Procfile, remove unused passlib dependency
+[33m520b5ff[m Fix production deployment - Use gunicorn WSGI server

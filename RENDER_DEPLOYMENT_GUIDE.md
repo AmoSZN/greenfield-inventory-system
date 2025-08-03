@@ -1,70 +1,83 @@
-# 🚀 RENDER.COM DEPLOYMENT GUIDE
+# 🚀 **COMPLETE RENDER DEPLOYMENT GUIDE**
 
-## AUTOMATED DEPLOYMENT STEPS
+## **STEP-BY-STEP INSTRUCTIONS**
 
-### Step 1: Access Render.com
-1. Go to **https://render.com**
-2. Click **"Get Started for Free"**
-3. Sign up with GitHub (recommended) or email
+### **STEP 1: Create Render Account**
+1. Go to https://render.com
+2. Click "Get Started for Free"
+3. Sign up with your GitHub account
+4. Authorize Render to access your repositories
 
-### Step 2: Create New Web Service
-1. Click **"New +"** button (top right)
-2. Select **"Web Service"**
-3. Choose **"Build and deploy from a Git repository"**
+### **STEP 2: Create New Web Service**
+1. Click "New +" button
+2. Select "Web Service"
+3. Connect your GitHub repository: `AmoSZN/greenfield-ai-suite`
+4. Click "Connect"
 
-### Step 3: Connect Repository
-1. Click **"Connect GitHub"** if not already connected
-2. Search for: **`greenfield-ai-suite`**
-3. Click **"Connect"** next to your repository
-
-### Step 4: Configure Service
-**Use these EXACT settings:**
-
+### **STEP 3: Configure Service Settings**
 - **Name**: `greenfield-inventory-system`
-- **Root Directory**: (leave blank)
 - **Environment**: `Python 3`
-- **Region**: `Oregon (US West)` (recommended)
+- **Region**: Choose closest to you (US East recommended)
 - **Branch**: `master`
+- **Root Directory**: Leave blank (root of repository)
 - **Build Command**: `pip install -r requirements.txt`
-- **Start Command**: `python wsgi.py`
+- **Start Command**: `python app.py`
 
-### Step 5: Environment Variables
-Click **"Advanced"** and add these environment variables:
+### **STEP 4: Set Environment Variables**
+Click "Environment" tab and add these variables:
 
-| Key | Value |
-|-----|-------|
-| `FLASK_ENV` | `production` |
-| `PORT` | `10000` |
-| `PYTHONPATH` | `.` |
+```
+PARADIGM_BASE_URL=https://greenfieldapi.para-apps.com
+PARADIGM_API_KEY=nVPsQFBteV&GEd7*8n0%RliVjksag8
+PARADIGM_USERNAME=mattamundson
+PARADIGM_PASSWORD=Morrison216!
+ANTHROPIC_API_KEY=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
+```
 
-### Step 6: Deploy
-1. Click **"Create Web Service"**
-2. Wait 5-10 minutes for deployment
-3. Your app will be live at: `https://greenfield-inventory-system.onrender.com`
+### **STEP 5: Deploy**
+1. Click "Create Web Service"
+2. Wait for deployment (5-10 minutes)
+3. Your system will be live at: `https://your-app-name.onrender.com`
 
-## 🎉 SUCCESS INDICATORS
+### **STEP 6: Test Your Live System**
+1. Visit your live URL
+2. Test the inventory search
+3. Try natural language commands
+4. Verify Paradigm ERP connection
 
-✅ Build logs show "Successfully installed" packages  
-✅ Deploy logs show "Running on http://0.0.0.0:10000"  
-✅ Health check passes at `/api/stats`  
-✅ Your inventory system is live worldwide!  
+## **TROUBLESHOOTING**
 
-## 🔧 TROUBLESHOOTING
+### **If Build Fails:**
+- Check the build logs in Render dashboard
+- Verify all files are committed to GitHub
+- Ensure requirements.txt exists
 
-If deployment fails:
-1. Check build logs for errors
-2. Ensure all files are pushed to GitHub
-3. Verify environment variables are set correctly
+### **If App Won't Start:**
+- Check the logs in Render dashboard
+- Verify environment variables are set correctly
+- Ensure app.py exists and is correct
 
-## 📊 YOUR LIVE FEATURES
+### **If Connection Issues:**
+- Verify Paradigm credentials are correct
+- Check if Paradigm API is accessible from Render's servers
 
-Once deployed, your system will have:
-- 🌐 **Global access** via HTTPS URL
-- 📱 **Mobile responsive** interface
-- 🔍 **Smart search** across 39,193 items
-- 🤖 **Advanced NLP** for natural language commands
-- 🔄 **Real-time ERP sync** with Paradigm
-- 📝 **Complete audit trail** of all changes
-- ⚡ **24/7 uptime** with automatic scaling
+## **POST-DEPLOYMENT**
 
-Your AI-powered inventory system will be **LIVE WORLDWIDE** in minutes!
+### **Custom Domain (Optional):**
+1. Go to your service settings
+2. Click "Custom Domains"
+3. Add your domain name
+4. Update DNS records
+
+### **Monitoring:**
+- View logs in Render dashboard
+- Set up alerts for downtime
+- Monitor performance metrics
+
+## **SUCCESS INDICATORS**
+✅ Build completes successfully
+✅ App starts without errors
+✅ Web interface loads
+✅ Can search for products
+✅ Natural language commands work
+✅ Paradigm ERP connection successful
