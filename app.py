@@ -57,27 +57,71 @@ def init_database():
             searched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )''')
         
-        # Add some sample data if tables are empty
+        # Add full inventory if database is empty
         c.execute('SELECT COUNT(*) FROM items')
         item_count = c.fetchone()[0]
         
         if item_count == 0:
-            logger.info("📊 Adding sample inventory data...")
-            sample_items = [
-                ('1015B', 'Steel Bar 15mm x 3m', 100),
-                ('1020B', 'Steel Bar 20mm x 3m', 75),
-                ('1025AW', 'Aluminum Wire 25mm', 50),
-                ('STEEL-001', 'Premium Steel Sheet', 200),
-                ('ALUM-002', 'Aluminum Plate', 150),
-                ('COPPER-003', 'Copper Wire 12AWG', 300),
-                ('IRON-004', 'Iron Rod 10mm', 125),
-                ('BRASS-005', 'Brass Fitting 1/2"', 80),
-            ]
+            logger.info("📊 Loading full inventory from CSV...")
             
-            for product_id, desc, qty in sample_items:
-                c.execute('''INSERT OR IGNORE INTO items 
-                           (product_id, description, quantity) 
-                           VALUES (?, ?, ?)''', (product_id, desc, qty))
+            # Try to load from full inventory CSV
+            import csv
+            import os
+            
+            csv_path = 'full_inventory_import.csv'
+            if os.path.exists(csv_path):
+                try:
+                    with open(csv_path, 'r', encoding='utf-8') as file:
+                        reader = csv.DictReader(file)
+                        products_added = 0
+                        
+                        for row in reader:
+                            product_id = row.get('StrProductID', '').strip()
+                            if product_id:
+                                description = row.get('MemDescription', '').strip()[:255]
+                                c.execute('''INSERT OR IGNORE INTO items 
+                                           (product_id, description, quantity) 
+                                           VALUES (?, ?, ?)''', (product_id, description, 0))
+                                products_added += 1
+                        
+                        logger.info(f"✅ Added {products_added} products from CSV")
+                        
+                except Exception as e:
+                    logger.error(f"❌ Error loading CSV: {e}")
+                    # Fall back to sample data
+                    logger.info("📊 Adding sample inventory data as fallback...")
+                    sample_items = [
+                        ('1015B', 'Steel Bar 15mm x 3m', 100),
+                        ('1020B', 'Steel Bar 20mm x 3m', 75),
+                        ('1025AW', 'Aluminum Wire 25mm', 50),
+                        ('STEEL-001', 'Premium Steel Sheet', 200),
+                        ('ALUM-002', 'Aluminum Plate', 150),
+                        ('COPPER-003', 'Copper Wire 12AWG', 300),
+                        ('IRON-004', 'Iron Rod 10mm', 125),
+                        ('BRASS-005', 'Brass Fitting 1/2"', 80),
+                    ]
+                    
+                    for product_id, desc, qty in sample_items:
+                        c.execute('''INSERT OR IGNORE INTO items 
+                                   (product_id, description, quantity) 
+                                   VALUES (?, ?, ?)''', (product_id, desc, qty))
+            else:
+                logger.info("📊 CSV not found, adding sample inventory data...")
+                sample_items = [
+                    ('1015B', 'Steel Bar 15mm x 3m', 100),
+                    ('1020B', 'Steel Bar 20mm x 3m', 75),
+                    ('1025AW', 'Aluminum Wire 25mm', 50),
+                    ('STEEL-001', 'Premium Steel Sheet', 200),
+                    ('ALUM-002', 'Aluminum Plate', 150),
+                    ('COPPER-003', 'Copper Wire 12AWG', 300),
+                    ('IRON-004', 'Iron Rod 10mm', 125),
+                    ('BRASS-005', 'Brass Fitting 1/2"', 80),
+                ]
+                
+                for product_id, desc, qty in sample_items:
+                    c.execute('''INSERT OR IGNORE INTO items 
+                               (product_id, description, quantity) 
+                               VALUES (?, ?, ?)''', (product_id, desc, qty))
         
         conn.commit()
         conn.close()
