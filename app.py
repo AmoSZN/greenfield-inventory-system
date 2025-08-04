@@ -14,6 +14,9 @@ logger = logging.getLogger(__name__)
 
 def init_database():
     """Initialize the database with all required tables"""
+    import csv
+    import os
+    
     try:
         # Ensure the Data directory exists
         os.makedirs('Data', exist_ok=True)
@@ -65,9 +68,6 @@ def init_database():
             logger.info("📊 Loading full inventory from CSV...")
             
             # Try to load from full inventory CSV
-            import csv
-            import os
-            
             csv_path = 'full_inventory_import.csv'
             if os.path.exists(csv_path):
                 try:
