@@ -321,13 +321,12 @@ class InventoryManager:
                         
                         if product_id:
                             c.execute('''INSERT OR REPLACE INTO items 
-                                         (product_id, description, quantity, last_updated, verified)
-                                         VALUES (?, ?, ?, ?, ?)''',
+                                         (product_id, description, quantity, updated_at)
+                                         VALUES (?, ?, ?, ?)''',
                                       (product_id,
                                        row.get('Description', row.get('description', '')),
-                                       float(row.get('Quantity', row.get('quantity', 0))),
-                                       datetime.now(),
-                                       1))
+                                       int(float(row.get('Quantity', row.get('quantity', 0)))),
+                                       datetime.now().isoformat()))
                             imported += 1
                         else:
                             errors.append(f"Missing product ID in row: {row}")
@@ -1123,6 +1122,9 @@ def import_csv():
         return jsonify({'success': False, 'error': 'No file selected'})
     
     if file and file.filename.endswith('.csv'):
+        # Ensure uploads directory exists
+        os.makedirs('uploads', exist_ok=True)
+        
         filename = secure_filename(file.filename)
         filepath = os.path.join('uploads', filename)
         file.save(filepath)
