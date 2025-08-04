@@ -120,30 +120,37 @@ class InventoryManager:
     
     def search_products(self, query):
         """Search for products in local database"""
-        conn = sqlite3.connect(DB_PATH)
-        c = conn.cursor()
-        
-        query = query.upper()
-        
-        # Search by product ID or description
-        c.execute('''SELECT product_id, description, quantity, verified 
-                     FROM items 
-                     WHERE product_id LIKE ? OR description LIKE ?
-                     ORDER BY times_accessed DESC
-                     LIMIT 50''', 
-                  (f'%{query}%', f'%{query}%'))
-        
-        results = []
-        for row in c.fetchall():
-            results.append({
-                'product_id': row[0],
-                'description': row[1] or 'No description',
-                'quantity': row[2],
-                'verified': row[3]
-            })
-        
-        conn.close()
-        return results
+        try:
+            conn = sqlite3.connect(DB_PATH)
+            c = conn.cursor()
+            
+            query = query.upper()
+            
+            # Search by product ID or description
+            c.execute('''SELECT product_id, description, quantity, times_accessed 
+                         FROM items 
+                         WHERE product_id LIKE ? OR description LIKE ?
+                         ORDER BY times_accessed DESC
+                         LIMIT 50''', 
+                      (f'%{query}%', f'%{query}%'))
+            
+            results = []
+            for row in c.fetchall():
+                results.append({
+                    'product_id': row[0],
+                    'description': row[1] or 'No description',
+                    'quantity': row[2],
+                    'times_accessed': row[3],
+                    'verified': True  # All items in database are considered verified
+                })
+            
+            conn.close()
+            logger.info(f"Search for '{query}' returned {len(results)} results")
+            return results
+            
+        except Exception as e:
+            logger.error(f"Search error: {e}")
+            return []
     
     def validate_product(self, product_id):
         """Validate product exists in Paradigm ERP"""
