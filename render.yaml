@@ -9,5 +9,5 @@ services:
         value: production
       - key: PYTHONPATH
         value: .
-    healthCheckPath: /api/stats
+    healthCheckPath: /health
     autoDeploy: true

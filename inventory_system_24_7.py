@@ -1159,21 +1159,42 @@ def export():
 
 @app.route('/api/stats')
 def stats():
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    
-    c.execute('SELECT COUNT(*) FROM items')
-    items_loaded = c.fetchone()[0]
-    
-    c.execute('''SELECT COUNT(*) FROM update_history 
-                 WHERE DATE(updated_at) = DATE('now')''')
-    updates_today = c.fetchone()[0]
-    
-    conn.close()
-    
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        
+        c.execute('SELECT COUNT(*) FROM items')
+        items_loaded = c.fetchone()[0]
+        
+        c.execute('''SELECT COUNT(*) FROM update_history 
+                     WHERE DATE(updated_at) = DATE('now')''')
+        updates_today = c.fetchone()[0]
+        
+        conn.close()
+        
+        return jsonify({
+            'status': 'healthy',
+            'items_loaded': items_loaded,
+            'updates_today': updates_today,
+            'database': 'connected',
+            'timestamp': datetime.now().isoformat()
+        })
+    except Exception as e:
+        logger.error(f"Stats endpoint error: {e}")
+        return jsonify({
+            'status': 'error',
+            'error': str(e),
+            'timestamp': datetime.now().isoformat()
+        }), 500
+
+# Simple health check for Render
+@app.route('/health')
+@app.route('/api/health')
+def health():
     return jsonify({
-        'items_loaded': items_loaded,
-        'updates_today': updates_today
+        'status': 'healthy',
+        'service': 'greenfield-inventory-system',
+        'timestamp': datetime.now().isoformat()
     })
 
 @app.route('/api/history')
