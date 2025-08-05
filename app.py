@@ -15,7 +15,6 @@ logger = logging.getLogger(__name__)
 def init_database():
     """Initialize the database with all required tables"""
     import csv
-    import os
     
     try:
         # Ensure the Data directory exists

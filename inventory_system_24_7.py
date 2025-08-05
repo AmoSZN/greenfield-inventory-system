@@ -1206,6 +1206,45 @@ def health():
         'timestamp': datetime.now().isoformat()
     })
 
+@app.route('/api/debug')
+def debug():
+    """Debug endpoint to check database and file status"""
+    import os
+    debug_info = {
+        'timestamp': datetime.now().isoformat(),
+        'database_exists': os.path.exists(DB_PATH),
+        'csv_file_exists': os.path.exists('full_inventory_import.csv'),
+        'current_directory': os.getcwd(),
+        'files_in_directory': [],
+        'database_stats': {}
+    }
+    
+    # List files in current directory
+    try:
+        debug_info['files_in_directory'] = os.listdir('.')
+    except Exception as e:
+        debug_info['files_error'] = str(e)
+    
+    # Check database stats
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        
+        c.execute('SELECT COUNT(*) FROM items')
+        debug_info['database_stats']['total_items'] = c.fetchone()[0]
+        
+        c.execute('SELECT COUNT(*) FROM update_history')
+        debug_info['database_stats']['total_updates'] = c.fetchone()[0]
+        
+        c.execute('SELECT COUNT(*) FROM search_history')
+        debug_info['database_stats']['total_searches'] = c.fetchone()[0]
+        
+        conn.close()
+    except Exception as e:
+        debug_info['database_error'] = str(e)
+    
+    return jsonify(debug_info)
+
 @app.route('/api/history')
 def history():
     conn = sqlite3.connect(DB_PATH)
