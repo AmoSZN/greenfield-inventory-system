@@ -1,0 +1,7 @@
+[33mcommit bb7349d0a5548ec6c69b0be0d1cf3dd1ededd752[m
+Author: mattamundson <31787354+mattamundson@users.noreply.github.com>
+Date:   Sun Aug 3 21:11:01 2025 -0500
+
+    Add full inventory CSV and update app.py to load all 39K products on startup
+
+app.py

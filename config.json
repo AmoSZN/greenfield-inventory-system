@@ -2,7 +2,7 @@
   "paradigm": {
     "api_base_url": "https://greenfieldapi.para-apps.com/api",
     "api_key": "nVPsQFBteV&GEd7*8n0%RliVjksag8",
-    "bearer_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VyTmFtZSI6IndlYl9hZG1pbiIsIlN0clBhcmFkaWdtVXNlciI6IndlYl9hZG1pbiIsIlN0ckZpcnN0TmFtZSI6IldlYiIsIlN0ckxhc3ROYW1lIjoiQWRtaW4iLCJleHAiOjE3NTQ3NjUyMDQsImlzcyI6IlBhcmFkaWdtIiwiYXVkIjoiUGFyYWRpZ20ifQ.-dpjG3oYq97Z4Pj04t_kvYUNEHyowluFmbDAvef3IiE",
+    "bearer_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VyTmFtZSI6IndlYl9hZG1pbiIsIlN0clBhcmFkaWdtVXNlciI6IndlYl9hZG1pbiIsIlN0ckZpcnN0TmFtZSI6IldlYiIsIlN0ckxhc3ROYW1lIjoiQWRtaW4iLCJleHAiOjE3NTUzMTE1NzIsImlzcyI6IlBhcmFkaWdtIiwiYXVkIjoiUGFyYWRpZ20ifQ.GLCR7YjoJYBOomCzOaaEMIT9YuFl1zrHgbEFkXrXMbk",
     "username": "web_admin",
     "password": "ChangeMe#123!"
   },

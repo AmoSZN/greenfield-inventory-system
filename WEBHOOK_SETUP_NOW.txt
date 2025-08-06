@@ -1,0 +1,30 @@
+============================================================
+WEBHOOK SETUP - DO THIS NOW!
+============================================================
+
+✅ Your ngrok URL: https://3215ad026630.ngrok-free.app/paradigm-webhook
+
+STEP-BY-STEP INSTRUCTIONS:
+1. Open Paradigm in your web browser
+2. Go to Settings → Admin → Configuration
+3. Find "Webhooks" or "Integrations" or "API"
+4. Click "Add New Webhook" or "Create Webhook"
+5. Fill in:
+   Name: Label Printer
+   URL: https://3215ad026630.ngrok-free.app/paradigm-webhook
+   Type: SalesOrder
+   Method: POST
+   Events: Create, Update
+6. Save the webhook
+
+TEST IT:
+1. Create a new sales order in Paradigm
+2. Watch your label printer - it should print automatically!
+3. Check the logs: Get-Content "C:\BarTenderIntegration\Logs\*.log" -Tail 10
+
+IF IT DOESN'T WORK:
+- Make sure ngrok window is still open
+- Check the webhook URL is exactly correct
+- Verify the webhook is enabled in Paradigm
+
+============================================================

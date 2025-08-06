@@ -3,11 +3,15 @@ services:
     name: greenfield-inventory-system
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: python app.py
+    startCommand: uvicorn hybrid_smart_inventory:app --host 0.0.0.0 --port $PORT
     envVars:
-      - key: FLASK_ENV
-        value: production
-      - key: PYTHONPATH
-        value: .
-    healthCheckPath: /health
-    autoDeploy: true
+      - key: PARADIGM_API_KEY
+        value: nVPsQFBteV&GEd7*8n0%RliVjksag8
+      - key: PARADIGM_USERNAME
+        value: web_admin
+      - key: PARADIGM_PASSWORD
+        value: ChangeMe#123!
+      - key: DATABASE_URL
+        value: sqlite:///./data/smart_inventory.db
+      - key: PYTHON_VERSION
+        value: 3.11.0

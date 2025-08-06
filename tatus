@@ -3,3 +3,8 @@
 [33m431c093[m CRITICAL FIX: Rename main_app.py to avoid Render confusion, explicit wsgi.py path
 [33mf22e32d[m Fix deployment: Add Procfile, remove unused passlib dependency
 [33m520b5ff[m Fix production deployment - Use gunicorn WSGI server
+[33meadd52a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m Fix app.py variable scope issue and add debug endpoint
+[33m0b9b4ee[m Fix variable scope error - move imports to top of init_database function
+[33mbb7349d[m Add full inventory CSV and update app.py to load all 39K products on startup
+[33m72b6657[m Fix bulk import functionality - correct database schema for CSV import
+[33m35343e2[m Fix search functionality - remove non-existent 'verified' column from database query

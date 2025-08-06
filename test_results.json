@@ -1,92 +1,92 @@
 {
-  "test_date": "2025-07-29T22:12:02.925352",
+  "test_date": "2025-08-05T21:32:41.435953",
   "passed": 5,
   "failed": 0,
   "results": [
     {
-      "time": "2025-07-29 22:11:46",
+      "time": "2025-08-05 21:32:31",
       "status": "TEST",
       "message": "Testing Paradigm API connection..."
     },
     {
-      "time": "2025-07-29 22:11:48",
+      "time": "2025-08-05 21:32:33",
       "status": "PASS",
       "message": "\u2713 Paradigm API connection successful"
     },
     {
-      "time": "2025-07-29 22:11:48",
+      "time": "2025-08-05 21:32:33",
       "status": "TEST",
       "message": "Testing directory structure..."
     },
     {
-      "time": "2025-07-29 22:11:48",
+      "time": "2025-08-05 21:32:33",
       "status": "PASS",
       "message": "\u2713 data_path: C:/BarTenderIntegration/Data/"
     },
     {
-      "time": "2025-07-29 22:11:48",
+      "time": "2025-08-05 21:32:33",
       "status": "PASS",
       "message": "\u2713 archive_path: C:/BarTenderIntegration/Archive/"
     },
     {
-      "time": "2025-07-29 22:11:48",
+      "time": "2025-08-05 21:32:33",
       "status": "PASS",
       "message": "\u2713 error_path: C:/BarTenderIntegration/ErrorReports/"
     },
     {
-      "time": "2025-07-29 22:11:48",
+      "time": "2025-08-05 21:32:33",
       "status": "PASS",
       "message": "\u2713 logs_path: C:/BarTenderIntegration/Logs/"
     },
     {
-      "time": "2025-07-29 22:11:48",
+      "time": "2025-08-05 21:32:33",
       "status": "TEST",
       "message": "Testing BarTender installation..."
     },
     {
-      "time": "2025-07-29 22:11:48",
+      "time": "2025-08-05 21:32:33",
       "status": "PASS",
       "message": "\u2713 BarTender executable found"
     },
     {
-      "time": "2025-07-29 22:11:48",
+      "time": "2025-08-05 21:32:33",
       "status": "PASS",
       "message": "\u2713 Packing list template found"
     },
     {
-      "time": "2025-07-29 22:11:48",
+      "time": "2025-08-05 21:32:33",
       "status": "TEST",
       "message": "Testing webhook service..."
     },
     {
-      "time": "2025-07-29 22:11:50",
+      "time": "2025-08-05 21:32:35",
       "status": "PASS",
       "message": "\u2713 Webhook service is running"
     },
     {
-      "time": "2025-07-29 22:11:50",
+      "time": "2025-08-05 21:32:35",
       "status": "TEST",
       "message": "Testing sample order printing..."
     },
     {
-      "time": "2025-07-29 22:11:50",
+      "time": "2025-08-05 21:32:35",
       "status": "TEST",
       "message": "Testing webhook service..."
     },
     {
-      "time": "2025-07-29 22:11:52",
+      "time": "2025-08-05 21:32:37",
       "status": "PASS",
       "message": "\u2713 Webhook service is running"
     },
     {
-      "time": "2025-07-29 22:12:02",
+      "time": "2025-08-05 21:32:41",
       "status": "PASS",
       "message": "\u2713 Sample order processed successfully"
     },
     {
-      "time": "2025-07-29 22:12:02",
+      "time": "2025-08-05 21:32:41",
       "status": "INFO",
-      "message": "  Response: {'details': 'Printed successfully', 'message': 'Order TEST-20250729-221152 printed', 'status': 'success'}"
+      "message": "  Response: {'details': 'Printed successfully', 'message': 'Order TEST-20250805-213237 printed', 'status': 'success'}"
     }
   ]
 }
