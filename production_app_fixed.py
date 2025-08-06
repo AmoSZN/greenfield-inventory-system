@@ -53,18 +53,36 @@ class ProductionInventoryManager:
                 "password": self.password
             }
             
-            async with httpx.AsyncClient() as client:
+            logger.info(f"🔐 Attempting authentication with Paradigm API...")
+            logger.info(f"🔐 URL: {self.base_url}/api/user/Auth/GetToken")
+            logger.info(f"🔐 Username: {self.username}")
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.post(
                     f"{self.base_url}/api/user/Auth/GetToken",
                     json=auth_data,
-                    headers={"X-API-Key": self.api_key}
+                    headers={"X-API-Key": self.api_key, "Content-Type": "application/json"}
                 )
                 
+                logger.info(f"🔐 Response status: {response.status_code}")
+                logger.info(f"🔐 Response headers: {dict(response.headers)}")
+                
                 if response.status_code == 200:
-                    data = response.json()
-                    self.auth_token = data.get("token") or data.get("access_token")
-                    logger.info("✅ Paradigm authentication successful")
-                    return True
+                    try:
+                        data = response.json()
+                        logger.info(f"🔐 Response data: {data}")
+                        self.auth_token = data.get("token") or data.get("access_token") or data.get("accessToken")
+                        
+                        if self.auth_token:
+                            logger.info("✅ Paradigm authentication successful")
+                            return True
+                        else:
+                            logger.error(f"❌ No token found in response: {data}")
+                            return False
+                    except Exception as json_error:
+                        logger.error(f"❌ JSON parsing error: {json_error}")
+                        logger.error(f"❌ Raw response: {response.text}")
+                        return False
                 else:
                     logger.error(f"❌ Authentication failed: {response.status_code} - {response.text}")
                     return False
@@ -1047,16 +1065,30 @@ async def test_paradigm_auth():
 async def get_paradigm_items(skip: int = 0, take: int = 100):
     """Get items from Paradigm - now triggers a sync first"""
     try:
+        logger.info(f"📦 Get All Items requested - skip: {skip}, take: {take}")
+        
+        # First check authentication
+        if not inventory_manager.auth_token:
+            logger.info("🔐 No auth token, attempting authentication...")
+            auth_result = await inventory_manager.authenticate()
+            if not auth_result:
+                logger.error("❌ Authentication failed")
+                return {"error": "Authentication failed - cannot connect to Paradigm API"}
+        
         # First sync to ensure we have latest data
+        logger.info("🔄 Starting sync to get latest data...")
         sync_result = await inventory_manager.sync_to_local_database()
         if not sync_result.get("success"):
+            logger.error(f"❌ Sync failed: {sync_result}")
             return sync_result
         
         # Then return local data for fast response
+        logger.info("🔍 Returning local data...")
         return await inventory_manager.search_local_inventory("")
+        
     except Exception as e:
-        logger.error(f"Get items error: {e}")
-        return {"error": str(e)}
+        logger.error(f"❌ Get items error: {e}")
+        return {"error": f"Get items failed: {str(e)}"}
 
 @app.post("/api/paradigm/update-quantity")
 async def update_paradigm_quantity(request: Request):
