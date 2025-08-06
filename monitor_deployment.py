@@ -1,90 +1,78 @@
 #!/usr/bin/env python3
 """
-Monitor production deployment status
+MONITOR DEPLOYMENT STATUS
+Track deployment progress and verify system is using latest code
 """
 
-import asyncio
-import httpx
+import requests
 import time
+import json
 from datetime import datetime
 
-PRODUCTION_URL = "https://greenfield-inventory-system.onrender.com"
+LIVE_URL = "https://greenfield-inventory-system.onrender.com"
 
-async def check_deployment():
-    """Check if new version is deployed"""
-    async with httpx.AsyncClient(timeout=10.0) as client:
+def monitor_deployment():
+    print("🔥 MONITORING DEPLOYMENT STATUS")
+    print("=" * 60)
+    
+    # Check current version and status
+    for attempt in range(10):
         try:
-            # Check for v2.5 in health endpoint
-            response = await client.get(f"{PRODUCTION_URL}/health")
-            if response.status_code == 200:
-                data = response.json()
-                version = data.get("version", "unknown")
-                if version == "2.5":
-                    return True, "v2.5 DEPLOYED"
-                else:
-                    return False, f"Old version still running: {version}"
-            else:
-                return False, f"Health check failed: {response.status_code}"
-        except Exception as e:
-            return False, f"Error: {e}"
-
-async def monitor():
-    """Monitor deployment progress"""
-    print("🔍 MONITORING PRODUCTION DEPLOYMENT")
-    print("=" * 50)
-    print(f"URL: {PRODUCTION_URL}")
-    print("Waiting for v2.5 deployment...\n")
-    
-    start_time = time.time()
-    check_count = 0
-    max_checks = 60  # Check for up to 10 minutes
-    
-    while check_count < max_checks:
-        check_count += 1
-        elapsed = int(time.time() - start_time)
-        
-        deployed, status = await check_deployment()
-        
-        timestamp = datetime.now().strftime("%H:%M:%S")
-        print(f"[{timestamp}] Check #{check_count} ({elapsed}s): {status}")
-        
-        if deployed:
-            print("\n" + "=" * 50)
-            print("🎉 DEPLOYMENT SUCCESSFUL!")
-            print(f"✅ Version 2.5 is now live at {PRODUCTION_URL}")
+            print(f"\n📡 Attempt {attempt + 1}/10 - {datetime.now().strftime('%H:%M:%S')}")
             
-            # Run full verification
-            print("\nRunning full system verification...")
-            await verify_system()
-            return True
-        
-        # Wait 10 seconds before next check
-        await asyncio.sleep(10)
+            # Health check
+            health_response = requests.get(f"{LIVE_URL}/health", timeout=30)
+            if health_response.status_code == 200:
+                health_data = health_response.json()
+                print(f"✅ Health: {health_data.get('status')} - Version: {health_data.get('version')}")
+                print(f"🔗 Paradigm Connected: {health_data.get('paradigm_connected')}")
+            else:
+                print(f"❌ Health check failed: {health_response.status_code}")
+                continue
+            
+            # Test sync endpoint with detailed response
+            print("🔄 Testing sync endpoint...")
+            sync_response = requests.post(f"{LIVE_URL}/api/paradigm/sync", timeout=120)
+            print(f"📊 Sync Status: {sync_response.status_code}")
+            
+            if sync_response.status_code == 200:
+                sync_data = sync_response.json()
+                print(f"📋 Sync Response: {json.dumps(sync_data, indent=2)}")
+                
+                # If sync shows success, check stats
+                if sync_data.get("success"):
+                    print("✅ Sync reports success! Checking stats...")
+                    time.sleep(2)
+                    
+                    stats_response = requests.get(f"{LIVE_URL}/api/stats")
+                    if stats_response.status_code == 200:
+                        stats_data = stats_response.json()
+                        print(f"📊 Stats: {json.dumps(stats_data, indent=2)}")
+                        
+                        if stats_data.get("total_items", 0) > 0:
+                            print("🎉 SUCCESS! Database has items!")
+                            return True
+                    
+                elif sync_data.get("error"):
+                    print(f"❌ Sync error: {sync_data.get('error')}")
+                else:
+                    print("⚠️ Sync response unclear")
+            else:
+                print(f"❌ Sync endpoint failed: {sync_response.status_code}")
+            
+            print(f"⏳ Waiting 30 seconds before next attempt...")
+            time.sleep(30)
+            
+        except Exception as e:
+            print(f"❌ Error on attempt {attempt + 1}: {e}")
+            time.sleep(10)
     
-    print("\n" + "=" * 50)
-    print("❌ DEPLOYMENT TIMEOUT - Manual intervention required")
+    print("❌ All attempts failed - deployment monitoring unsuccessful")
     return False
 
-async def verify_system():
-    """Verify all endpoints are working"""
-    async with httpx.AsyncClient(timeout=10.0) as client:
-        endpoints = [
-            ("/health", "Health Check"),
-            ("/api/stats", "API Stats"),
-            ("/api/paradigm/auth", "Paradigm Auth"),
-            ("/api/paradigm/items?skip=0&take=5", "Paradigm Items"),
-        ]
-        
-        print("\n📊 SYSTEM VERIFICATION:")
-        for endpoint, description in endpoints:
-            try:
-                response = await client.get(f"{PRODUCTION_URL}{endpoint}")
-                if response.status_code == 200:
-                    print(f"✅ {description}: WORKING")
-                else:
-                    print(f"❌ {description}: Status {response.status_code}")
-            except Exception as e:
-                print(f"❌ {description}: ERROR")
-
 if __name__ == "__main__":
-    asyncio.run(monitor())
+    success = monitor_deployment()
+    if success:
+        print("\n🎉 DEPLOYMENT SUCCESSFUL - SYSTEM IS WORKING!")
+    else:
+        print("\n❌ DEPLOYMENT FAILED - MANUAL INTERVENTION REQUIRED")
