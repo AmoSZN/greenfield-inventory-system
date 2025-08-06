@@ -114,16 +114,15 @@ class ProductionInventoryManager:
             # Find the item to update
             current_item = None
             for item in items_response.get("items", []):
-                if item.get("strProductID") == product_id or item.get("productId") == product_id:
+                if item.get("strProductID") == product_id:
                     current_item = item.copy()
                     break
             
             if not current_item:
                 return {"error": f"Item {product_id} not found"}
             
-            # Update the quantity
-            current_item["currentQuantity"] = new_quantity
-            current_item["quantity"] = new_quantity
+            # Update the quantity using the correct Paradigm field name
+            current_item["decUnitsInStock"] = new_quantity
             
             async with httpx.AsyncClient() as client:
                 headers = {
@@ -171,9 +170,9 @@ class ProductionInventoryManager:
                 ''')
                 
                 for item in items:
-                    product_id = item.get("strProductID") or item.get("productId")
-                    description = item.get("memDescription") or item.get("description")
-                    quantity = item.get("currentQuantity") or item.get("quantity") or 0
+                    product_id = item.get("strProductID")
+                    description = item.get("memDescription")
+                    quantity = item.get("decUnitsInStock") or 0
                     
                     if product_id:
                         await db.execute('''
@@ -515,13 +514,13 @@ async def main_page():
             
             async function testUpdateItem() {
                 const results = document.getElementById('testResults');
-                results.innerHTML = '<div class="result">✏️ Updating item 1015AW to quantity 150...</div>';
+                results.innerHTML = '<div class="result">✏️ Updating item CO4129QQ to quantity 150...</div>';
                 
                 try {
                     const response = await fetch('/api/paradigm/update-quantity', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({product_id: '1015AW', quantity: 150})
+                        body: JSON.stringify({product_id: 'CO4129QQ', quantity: 150})
                     });
                     const data = await response.json();
                     results.innerHTML = `<div class="result ${data.success ? 'success' : 'error'}">✏️ Update Result: ${JSON.stringify(data, null, 2)}</div>`;

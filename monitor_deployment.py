@@ -14,15 +14,15 @@ async def check_deployment():
     """Check if new version is deployed"""
     async with httpx.AsyncClient(timeout=10.0) as client:
         try:
-            # Check for v2.1 in health endpoint
+            # Check for v2.5 in health endpoint
             response = await client.get(f"{PRODUCTION_URL}/health")
             if response.status_code == 200:
                 data = response.json()
                 version = data.get("version", "unknown")
-                if version == "2.1":
-                    return True, "v2.1 DEPLOYED"
+                if version == "2.5":
+                    return True, "v2.5 DEPLOYED"
                 else:
-                    return False, f"Old version still running"
+                    return False, f"Old version still running: {version}"
             else:
                 return False, f"Health check failed: {response.status_code}"
         except Exception as e:
@@ -33,7 +33,7 @@ async def monitor():
     print("🔍 MONITORING PRODUCTION DEPLOYMENT")
     print("=" * 50)
     print(f"URL: {PRODUCTION_URL}")
-    print("Waiting for v2.1 deployment...\n")
+    print("Waiting for v2.5 deployment...\n")
     
     start_time = time.time()
     check_count = 0
@@ -51,7 +51,7 @@ async def monitor():
         if deployed:
             print("\n" + "=" * 50)
             print("🎉 DEPLOYMENT SUCCESSFUL!")
-            print(f"✅ Version 2.1 is now live at {PRODUCTION_URL}")
+            print(f"✅ Version 2.5 is now live at {PRODUCTION_URL}")
             
             # Run full verification
             print("\nRunning full system verification...")
@@ -71,7 +71,8 @@ async def verify_system():
         endpoints = [
             ("/health", "Health Check"),
             ("/api/stats", "API Stats"),
-            ("/test-webhook", "Webhook Test"),
+            ("/api/paradigm/auth", "Paradigm Auth"),
+            ("/api/paradigm/items?skip=0&take=5", "Paradigm Items"),
         ]
         
         print("\n📊 SYSTEM VERIFICATION:")
