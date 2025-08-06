@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Greenfield Metal Sales - Fixed Production Inventory System
+Greenfield Metal Sales - Fixed Production Inventory System v2.1
 24/7 Cloud-hosted inventory management with real-time Paradigm integration
 """
 
@@ -179,7 +179,7 @@ inventory_manager = ProductionInventoryManager()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan events"""
-    logger.info("Starting Greenfield Production Inventory System")
+    logger.info("Starting Greenfield Production Inventory System v2.1")
     
     # Initialize database
     async with aiosqlite.connect(DB_PATH) as db:
@@ -197,7 +197,7 @@ async def lifespan(app: FastAPI):
     
     logger.info("Shutting down Greenfield Production Inventory System")
 
-app = FastAPI(title="Greenfield Metal Sales - Production Inventory System", lifespan=lifespan)
+app = FastAPI(title="Greenfield Metal Sales - Production Inventory System v2.1", lifespan=lifespan)
 
 @app.get("/", response_class=HTMLResponse)
 async def main_page():
@@ -206,7 +206,7 @@ async def main_page():
     <!DOCTYPE html>
     <html>
     <head>
-        <title>Greenfield Metal Sales - Production Inventory</title>
+        <title>Greenfield Metal Sales - Production Inventory v2.1</title>
         <style>
             body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
             .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
@@ -223,12 +223,13 @@ async def main_page():
     <body>
         <div class="container">
             <h1>🏭 Greenfield Metal Sales</h1>
-            <h2>Production Inventory Management System</h2>
+            <h2>Production Inventory Management System v2.1</h2>
             
             <div class="status success">
                 ✅ System Status: OPERATIONAL<br>
                 🌐 Production URL: https://greenfield-inventory-system.onrender.com<br>
-                🔗 Paradigm Integration: ACTIVE
+                🔗 Paradigm Integration: ACTIVE<br>
+                📊 Database: FIXED
             </div>
             
             <div class="stats">
@@ -308,8 +309,8 @@ async def health_check():
     return {
         "status": "healthy",
         "timestamp": datetime.now().isoformat(),
-        "service": "Greenfield Production Inventory System",
-        "version": "2.0",
+        "service": "Greenfield Production Inventory System v2.1",
+        "version": "2.1",
         "paradigm_connected": inventory_manager.auth_token is not None
     }
 
@@ -331,7 +332,8 @@ async def get_stats():
             "last_sync": last_update_time,
             "system_status": "operational",
             "paradigm_connected": inventory_manager.auth_token is not None,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
+            "version": "2.1"
         }
     except Exception as e:
         logger.error(f"Stats error: {e}")
@@ -369,7 +371,8 @@ async def test_webhook():
     return {
         "message": "Webhook endpoint is working",
         "url": "https://greenfield-inventory-system.onrender.com/paradigm-webhook",
-        "instructions": "Configure this URL in Paradigm ERP webhook settings"
+        "instructions": "Configure this URL in Paradigm ERP webhook settings",
+        "version": "2.1"
     }
 
 if __name__ == "__main__":
