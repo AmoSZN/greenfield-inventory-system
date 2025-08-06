@@ -1,31 +1,33 @@
 #!/usr/bin/env python3
 """
-Greenfield Metal Sales - Fixed Production Inventory System v2.1
+Greenfield Metal Sales - Production Inventory System v2.4
 24/7 Cloud-hosted inventory management with real-time Paradigm integration
 """
 
-import os
 import asyncio
-import logging
-from datetime import datetime
-from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import HTMLResponse, JSONResponse
-import httpx
 import aiosqlite
-from contextlib import asynccontextmanager
+import httpx
+import logging
+import os
+from datetime import datetime
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from typing import Optional, List, Dict, Any
+import json
 
-# Configure logging for production
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Production configuration
+# Paradigm API Configuration
 PARADIGM_BASE_URL = "https://greenfieldapi.para-apps.com"
-PARADIGM_API_KEY = os.getenv("PARADIGM_API_KEY", "nVPsQFBteV&GEd7*8n0%RliVjksag8")
-PARADIGM_USERNAME = os.getenv("PARADIGM_USERNAME", "web_admin")
-PARADIGM_PASSWORD = os.getenv("PARADIGM_PASSWORD", "ChangeMe#123!")
+PARADIGM_API_KEY = "nVPsQFBteV&GEd7*8n0%RliVjksag8"
+PARADIGM_USERNAME = "web_admin"
+PARADIGM_PASSWORD = "ChangeMe#123!"
+
+# Database path
 DB_PATH = "data/smart_inventory.db"
 
 # Ensure data directory exists
@@ -34,77 +36,183 @@ os.makedirs("data", exist_ok=True)
 class ProductionInventoryManager:
     def __init__(self):
         self.auth_token = None
-        self.last_sync = None
+        self.base_url = PARADIGM_BASE_URL
+        self.api_key = PARADIGM_API_KEY
+        self.username = PARADIGM_USERNAME
+        self.password = PARADIGM_PASSWORD
         
     async def authenticate(self):
         """Authenticate with Paradigm API"""
         try:
+            auth_data = {
+                "username": self.username,
+                "password": self.password
+            }
+            
             async with httpx.AsyncClient() as client:
-                auth_data = {
-                    "username": PARADIGM_USERNAME,
-                    "password": PARADIGM_PASSWORD
-                }
                 response = await client.post(
-                    f"{PARADIGM_BASE_URL}/api/user/Auth/GetToken",
+                    f"{self.base_url}/api/user/Auth/GetToken",
                     json=auth_data,
-                    headers={"X-API-Key": PARADIGM_API_KEY}
+                    headers={"X-API-Key": self.api_key}
                 )
-                response.raise_for_status()
-                self.auth_token = response.json().get("token")
-                logger.info("Paradigm authentication successful")
-                return True
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    self.auth_token = data.get("token") or data.get("access_token")
+                    logger.info("✅ Paradigm authentication successful")
+                    return True
+                else:
+                    logger.error(f"❌ Authentication failed: {response.status_code} - {response.text}")
+                    return False
+                    
         except Exception as e:
-            logger.error(f"Authentication failed: {e}")
+            logger.error(f"❌ Authentication error: {e}")
             return False
     
-    async def sync_inventory_from_paradigm(self):
-        """Sync inventory from Paradigm - try multiple endpoints"""
+    async def get_inventory_items(self, skip: int = 0, take: int = 100):
+        """Get inventory items from Paradigm"""
         if not self.auth_token:
-            await self.authenticate()
-            
-        if not self.auth_token:
-            return {"error": "Authentication failed"}
-            
+            if not await self.authenticate():
+                return {"error": "Authentication failed"}
+        
         try:
             async with httpx.AsyncClient() as client:
                 headers = {
                     "Authorization": f"Bearer {self.auth_token}",
-                    "X-API-Key": PARADIGM_API_KEY
+                    "X-API-Key": self.api_key
                 }
                 
-                # Try multiple possible endpoints
-                endpoints = [
-                    "/api/Inventory/GetItems",
-                    "/api/Items/GetItems", 
-                    "/api/Products/GetAll",
-                    "/api/Inventory/GetInventory"
-                ]
+                response = await client.get(
+                    f"{self.base_url}/api/Items/GetItems/{skip}/{take}",
+                    headers=headers
+                )
                 
-                for endpoint in endpoints:
-                    try:
-                        response = await client.get(
-                            f"{PARADIGM_BASE_URL}{endpoint}",
-                            headers=headers
-                        )
-                        if response.status_code == 200:
-                            items = response.json()
-                            logger.info(f"Successfully synced from {endpoint}")
-                            
-                            # Update local database
-                            await self._update_local_database(items)
-                            return {"success": True, "items_count": len(items), "endpoint": endpoint}
-                    except Exception as e:
-                        logger.warning(f"Endpoint {endpoint} failed: {e}")
-                        continue
-                
-                return {"error": "No working inventory endpoint found"}
-                
+                if response.status_code == 200:
+                    items = response.json()
+                    logger.info(f"✅ Retrieved {len(items)} items from Paradigm")
+                    return {"success": True, "items": items, "count": len(items)}
+                else:
+                    logger.error(f"❌ GetItems failed: {response.status_code} - {response.text}")
+                    return {"error": f"API call failed: {response.status_code}"}
+                    
         except Exception as e:
-            logger.error(f"Sync failed: {e}")
+            logger.error(f"❌ GetItems error: {e}")
             return {"error": str(e)}
     
-    async def _update_local_database(self, items):
-        """Update local database with inventory data"""
+    async def update_item_quantity(self, product_id: str, new_quantity: int):
+        """Update item quantity in Paradigm"""
+        if not self.auth_token:
+            if not await self.authenticate():
+                return {"error": "Authentication failed"}
+        
+        try:
+            # First get the current item to update it
+            items_response = await self.get_inventory_items(0, 1000)
+            if "error" in items_response:
+                return items_response
+            
+            # Find the item to update
+            current_item = None
+            for item in items_response.get("items", []):
+                if item.get("strProductID") == product_id or item.get("productId") == product_id:
+                    current_item = item.copy()
+                    break
+            
+            if not current_item:
+                return {"error": f"Item {product_id} not found"}
+            
+            # Update the quantity
+            current_item["currentQuantity"] = new_quantity
+            current_item["quantity"] = new_quantity
+            
+            async with httpx.AsyncClient() as client:
+                headers = {
+                    "Authorization": f"Bearer {self.auth_token}",
+                    "X-API-Key": self.api_key,
+                    "Content-Type": "application/json"
+                }
+                
+                response = await client.put(
+                    f"{self.base_url}/api/Items/UpdateItem",
+                    json=current_item,
+                    headers=headers
+                )
+                
+                if response.status_code == 200:
+                    logger.info(f"✅ Updated {product_id} to quantity {new_quantity}")
+                    return {"success": True, "product_id": product_id, "new_quantity": new_quantity}
+                else:
+                    logger.error(f"❌ UpdateItem failed: {response.status_code} - {response.text}")
+                    return {"error": f"Update failed: {response.status_code}"}
+                    
+        except Exception as e:
+            logger.error(f"❌ UpdateItem error: {e}")
+            return {"error": str(e)}
+    
+    async def sync_to_local_database(self):
+        """Sync Paradigm data to local database"""
+        try:
+            # Get items from Paradigm
+            response = await self.get_inventory_items(0, 1000)
+            if "error" in response:
+                return response
+            
+            items = response.get("items", [])
+            
+            # Update local database
+            async with aiosqlite.connect(DB_PATH) as db:
+                await db.execute('''
+                    CREATE TABLE IF NOT EXISTS inventory (
+                        product_id TEXT PRIMARY KEY,
+                        description TEXT,
+                        current_quantity INTEGER,
+                        last_updated TIMESTAMP
+                    )
+                ''')
+                
+                for item in items:
+                    product_id = item.get("strProductID") or item.get("productId")
+                    description = item.get("memDescription") or item.get("description")
+                    quantity = item.get("currentQuantity") or item.get("quantity") or 0
+                    
+                    if product_id:
+                        await db.execute('''
+                            INSERT OR REPLACE INTO inventory 
+                            (product_id, description, current_quantity, last_updated)
+                            VALUES (?, ?, ?, ?)
+                        ''', (product_id, description, quantity, datetime.now()))
+                
+                await db.commit()
+            
+            logger.info(f"✅ Synced {len(items)} items to local database")
+            return {"success": True, "items_synced": len(items)}
+            
+        except Exception as e:
+            logger.error(f"❌ Sync error: {e}")
+            return {"error": str(e)}
+
+# Initialize inventory manager
+inventory_manager = ProductionInventoryManager()
+
+# Create FastAPI app
+app = FastAPI(title="Greenfield Metal Sales Inventory System", version="2.4")
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.on_event("startup")
+async def startup_event():
+    """Initialize system on startup"""
+    logger.info("🚀 Starting Greenfield Metal Sales Inventory System v2.4")
+    
+    # Initialize database
+    try:
         async with aiosqlite.connect(DB_PATH) as db:
             await db.execute('''
                 CREATE TABLE IF NOT EXISTS inventory (
@@ -114,101 +222,28 @@ class ProductionInventoryManager:
                     last_updated TIMESTAMP
                 )
             ''')
-            
-            for item in items:
-                product_id = item.get("productId") or item.get("id") or item.get("ProductId")
-                description = item.get("description") or item.get("Description") or item.get("name")
-                quantity = item.get("currentQuantity") or item.get("quantity") or item.get("Quantity") or 0
-                
-                if product_id:
-                    await db.execute('''
-                        INSERT OR REPLACE INTO inventory 
-                        (product_id, description, current_quantity, last_updated)
-                        VALUES (?, ?, ?, ?)
-                    ''', (product_id, description, quantity, datetime.now()))
-            
             await db.commit()
+        logger.info("✅ Database initialized")
+    except Exception as e:
+        logger.error(f"❌ Database initialization failed: {e}")
     
-    async def update_item_quantity(self, product_id: str, new_quantity: int):
-        """Update item quantity in Paradigm"""
-        if not self.auth_token:
-            await self.authenticate()
-            
-        try:
-            async with httpx.AsyncClient() as client:
-                headers = {
-                    "Authorization": f"Bearer {self.auth_token}",
-                    "X-API-Key": PARADIGM_API_KEY
-                }
-                
-                update_data = {
-                    "productId": product_id,
-                    "quantity": new_quantity
-                }
-                
-                # Try multiple update endpoints
-                endpoints = [
-                    "/api/Inventory/UpdateQuantity",
-                    "/api/Items/UpdateQuantity",
-                    "/api/Products/UpdateQuantity"
-                ]
-                
-                for endpoint in endpoints:
-                    try:
-                        response = await client.post(
-                            f"{PARADIGM_BASE_URL}{endpoint}",
-                            json=update_data,
-                            headers=headers
-                        )
-                        if response.status_code == 200:
-                            logger.info(f"Successfully updated {product_id} to {new_quantity}")
-                            return {"success": True, "product_id": product_id, "new_quantity": new_quantity}
-                    except Exception as e:
-                        logger.warning(f"Update endpoint {endpoint} failed: {e}")
-                        continue
-                
-                return {"error": "No working update endpoint found"}
-                
-        except Exception as e:
-            logger.error(f"Update failed: {e}")
-            return {"error": str(e)}
-
-# Global manager instance
-inventory_manager = ProductionInventoryManager()
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Application lifespan events"""
-    logger.info("Starting Greenfield Production Inventory System v2.1")
-    
-    # Initialize database
-    async with aiosqlite.connect(DB_PATH) as db:
-        await db.execute('''
-            CREATE TABLE IF NOT EXISTS inventory (
-                product_id TEXT PRIMARY KEY,
-                description TEXT,
-                current_quantity INTEGER,
-                last_updated TIMESTAMP
-            )
-        ''')
-        await db.commit()
-    
-    yield
-    
-    logger.info("Shutting down Greenfield Production Inventory System")
-
-app = FastAPI(title="Greenfield Metal Sales - Production Inventory System v2.1", lifespan=lifespan)
+    # Test Paradigm connection
+    auth_result = await inventory_manager.authenticate()
+    if auth_result:
+        logger.info("✅ Paradigm API connection successful")
+    else:
+        logger.error("❌ Paradigm API connection failed")
 
 @app.get("/", response_class=HTMLResponse)
 async def main_page():
     """Main dashboard page"""
-    return HTML("""
+    return HTMLResponse("""
     <!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Greenfield Metal Sales - Production Inventory Management System v2.3</title>
+        <title>Greenfield Metal Sales - Production Inventory System v2.4</title>
         <style>
             body {
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -319,13 +354,52 @@ async def main_page():
                 padding: 20px;
                 font-size: 0.9em;
             }
+            .test-section {
+                background: #fff3cd;
+                border: 1px solid #ffeaa7;
+                border-radius: 10px;
+                padding: 20px;
+                margin: 20px 0;
+            }
+            .test-button {
+                background: #007bff;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 5px;
+                cursor: pointer;
+                margin: 5px;
+                font-size: 14px;
+            }
+            .test-button:hover {
+                background: #0056b3;
+            }
+            .result {
+                margin-top: 10px;
+                padding: 10px;
+                border-radius: 5px;
+                font-family: monospace;
+                font-size: 12px;
+                max-height: 200px;
+                overflow-y: auto;
+            }
+            .success {
+                background: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+            }
+            .error {
+                background: #f8d7da;
+                color: #721c24;
+                border: 1px solid #f5c6cb;
+            }
         </style>
     </head>
     <body>
         <div class="container">
             <div class="header">
                 <h1>🏭 Greenfield Metal Sales</h1>
-                <p>Production Inventory Management System <span class="version-badge">v2.3</span></p>
+                <p>Production Inventory Management System <span class="version-badge">v2.4</span></p>
                 <p>24/7 Cloud-Hosted with Real-Time Paradigm ERP Integration</p>
             </div>
             
@@ -349,6 +423,16 @@ async def main_page():
                     </div>
                 </div>
                 
+                <div class="test-section">
+                    <h3>🧪 TEST PARADIGM INTEGRATION</h3>
+                    <p>Click the buttons below to test the Paradigm API integration:</p>
+                    <button class="test-button" onclick="testAuth()">🔐 Test Authentication</button>
+                    <button class="test-button" onclick="testGetItems()">📦 Get Inventory Items</button>
+                    <button class="test-button" onclick="testUpdateItem()">✏️ Update Item (1015AW to 150)</button>
+                    <button class="test-button" onclick="testSync()">🔄 Sync to Local DB</button>
+                    <div id="testResults"></div>
+                </div>
+                
                 <div class="api-section">
                     <h3>🔌 Available API Endpoints</h3>
                     
@@ -363,23 +447,23 @@ async def main_page():
                     </div>
                     
                     <div class="endpoint">
-                        <h4>Search Inventory</h4>
-                        <p>GET /api/search?q={search_term}</p>
+                        <h4>Get Paradigm Items</h4>
+                        <p>GET /api/paradigm/items?skip=0&take=100</p>
                     </div>
                     
                     <div class="endpoint">
                         <h4>Update Item Quantity</h4>
-                        <p>POST /api/update-quantity</p>
+                        <p>POST /api/paradigm/update-quantity</p>
                     </div>
                     
                     <div class="endpoint">
-                        <h4>Sync from Paradigm</h4>
-                        <p>POST /api/sync-paradigm</p>
+                        <h4>Sync to Local Database</h4>
+                        <p>POST /api/paradigm/sync</p>
                     </div>
                     
                     <div class="endpoint">
-                        <h4>Webhook Test</h4>
-                        <p>GET /test-webhook</p>
+                        <h4>Search Local Inventory</h4>
+                        <p>GET /api/search?q={search_term}</p>
                     </div>
                 </div>
                 
@@ -398,9 +482,67 @@ async def main_page():
             
             <div class="footer">
                 <p>© 2024 Greenfield Metal Sales - AI-Powered Inventory Management System</p>
-                <p>Production Environment | Version 2.3 | Render.com Deployment</p>
+                <p>Production Environment | Version 2.4 | Render.com Deployment</p>
             </div>
         </div>
+        
+        <script>
+            async function testAuth() {
+                const results = document.getElementById('testResults');
+                results.innerHTML = '<div class="result">🔐 Testing authentication...</div>';
+                
+                try {
+                    const response = await fetch('/api/paradigm/auth');
+                    const data = await response.json();
+                    results.innerHTML = `<div class="result ${data.success ? 'success' : 'error'}">🔐 Auth Result: ${JSON.stringify(data, null, 2)}</div>`;
+                } catch (error) {
+                    results.innerHTML = `<div class="result error">❌ Auth Error: ${error}</div>`;
+                }
+            }
+            
+            async function testGetItems() {
+                const results = document.getElementById('testResults');
+                results.innerHTML = '<div class="result">📦 Getting inventory items...</div>';
+                
+                try {
+                    const response = await fetch('/api/paradigm/items?skip=0&take=10');
+                    const data = await response.json();
+                    results.innerHTML = `<div class="result ${data.success ? 'success' : 'error'}">📦 Items Result: ${JSON.stringify(data, null, 2)}</div>`;
+                } catch (error) {
+                    results.innerHTML = `<div class="result error">❌ GetItems Error: ${error}</div>`;
+                }
+            }
+            
+            async function testUpdateItem() {
+                const results = document.getElementById('testResults');
+                results.innerHTML = '<div class="result">✏️ Updating item 1015AW to quantity 150...</div>';
+                
+                try {
+                    const response = await fetch('/api/paradigm/update-quantity', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({product_id: '1015AW', quantity: 150})
+                    });
+                    const data = await response.json();
+                    results.innerHTML = `<div class="result ${data.success ? 'success' : 'error'}">✏️ Update Result: ${JSON.stringify(data, null, 2)}</div>`;
+                } catch (error) {
+                    results.innerHTML = `<div class="result error">❌ Update Error: ${error}</div>`;
+                }
+            }
+            
+            async function testSync() {
+                const results = document.getElementById('testResults');
+                results.innerHTML = '<div class="result">🔄 Syncing to local database...</div>';
+                
+                try {
+                    const response = await fetch('/api/paradigm/sync', {method: 'POST'});
+                    const data = await response.json();
+                    results.innerHTML = `<div class="result ${data.success ? 'success' : 'error'}">🔄 Sync Result: ${JSON.stringify(data, null, 2)}</div>`;
+                } catch (error) {
+                    results.innerHTML = `<div class="result error">❌ Sync Error: ${error}</div>`;
+                }
+            }
+        </script>
     </body>
     </html>
     """)
@@ -410,10 +552,11 @@ async def health_check():
     """Health check endpoint"""
     return {
         "status": "healthy",
-        "version": "2.3",
+        "version": "2.4",
         "timestamp": datetime.now().isoformat(),
         "service": "Greenfield Metal Sales Inventory System",
-        "environment": "production"
+        "environment": "production",
+        "paradigm_connected": inventory_manager.auth_token is not None
     }
 
 @app.get("/api/stats")
@@ -427,54 +570,82 @@ async def get_stats():
             
             cursor = await db.execute("SELECT MAX(last_updated) FROM inventory")
             last_update = await cursor.fetchone()
-            last_update_time = last_update[0] if last_update and last_update[0] else "Never"
+            last_updated = last_update[0] if last_update and last_update[0] else "Never"
         
         return {
             "total_items": item_count,
-            "last_sync": last_update_time,
-            "system_status": "operational",
+            "last_sync": last_updated,
             "paradigm_connected": inventory_manager.auth_token is not None,
-            "timestamp": datetime.now().isoformat(),
-            "version": "v2.2-1754471211"
+            "version": "2.4"
         }
     except Exception as e:
         logger.error(f"Stats error: {e}")
         return {"error": str(e)}
 
-@app.post("/api/sync")
-async def sync_inventory():
-    """Sync inventory from Paradigm"""
-    result = await inventory_manager.sync_inventory_from_paradigm()
-    return result
+@app.get("/api/paradigm/auth")
+async def test_paradigm_auth():
+    """Test Paradigm authentication"""
+    result = await inventory_manager.authenticate()
+    return {"success": result, "authenticated": inventory_manager.auth_token is not None}
 
-@app.post("/paradigm-webhook")
-async def paradigm_webhook(request: Request):
-    """Handle Paradigm webhook updates"""
+@app.get("/api/paradigm/items")
+async def get_paradigm_items(skip: int = 0, take: int = 100):
+    """Get items from Paradigm"""
+    return await inventory_manager.get_inventory_items(skip, take)
+
+@app.post("/api/paradigm/update-quantity")
+async def update_paradigm_quantity(request: Request):
+    """Update item quantity in Paradigm"""
     try:
         data = await request.json()
-        logger.info(f"Received webhook: {data}")
+        product_id = data.get("product_id")
+        quantity = data.get("quantity")
         
-        # Process the webhook data
-        if "productId" in data and "quantity" in data:
-            result = await inventory_manager.update_item_quantity(
-                data["productId"], 
-                data["quantity"]
-            )
-            return {"success": True, "processed": result}
+        if not product_id or quantity is None:
+            raise HTTPException(status_code=400, detail="product_id and quantity required")
         
-        return {"success": True, "message": "Webhook received"}
+        return await inventory_manager.update_item_quantity(product_id, quantity)
     except Exception as e:
-        logger.error(f"Webhook error: {e}")
+        logger.error(f"Update quantity error: {e}")
+        return {"error": str(e)}
+
+@app.post("/api/paradigm/sync")
+async def sync_paradigm_data():
+    """Sync Paradigm data to local database"""
+    return await inventory_manager.sync_to_local_database()
+
+@app.get("/api/search")
+async def search_inventory(q: str):
+    """Search local inventory"""
+    try:
+        async with aiosqlite.connect(DB_PATH) as db:
+            cursor = await db.execute(
+                "SELECT * FROM inventory WHERE product_id LIKE ? OR description LIKE ?",
+                (f"%{q}%", f"%{q}%")
+            )
+            rows = await cursor.fetchall()
+            
+            items = []
+            for row in rows:
+                items.append({
+                    "product_id": row[0],
+                    "description": row[1],
+                    "quantity": row[2],
+                    "last_updated": row[3]
+                })
+            
+            return {"success": True, "items": items, "count": len(items)}
+    except Exception as e:
+        logger.error(f"Search error: {e}")
         return {"error": str(e)}
 
 @app.get("/test-webhook")
 async def test_webhook():
     """Test webhook endpoint"""
     return {
-        "message": "Webhook endpoint is working",
-        "url": "https://greenfield-inventory-system.onrender.com/paradigm-webhook",
-        "instructions": "Configure this URL in Paradigm ERP webhook settings",
-        "version": "v2.2-1754471211"
+        "status": "webhook_ready",
+        "message": "Webhook endpoint is operational",
+        "timestamp": datetime.now().isoformat()
     }
 
 if __name__ == "__main__":
