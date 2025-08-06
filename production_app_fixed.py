@@ -674,8 +674,8 @@ async def search_paradigm_items(q: str):
         matching_items = []
         
         for item in items:
-            product_id = item.get("strProductID", "").lower()
-            description = item.get("memDescription", "").lower()
+            product_id = (item.get("strProductID") or "").lower()
+            description = (item.get("memDescription") or "").lower()
             
             if search_term in product_id or search_term in description:
                 matching_items.append({
