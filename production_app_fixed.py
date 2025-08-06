@@ -9,13 +9,15 @@ import aiosqlite
 import httpx
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 import json
+import threading
+import time
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -40,6 +42,8 @@ class ProductionInventoryManager:
         self.api_key = PARADIGM_API_KEY
         self.username = PARADIGM_USERNAME
         self.password = PARADIGM_PASSWORD
+        self.last_sync_time = None
+        self.sync_in_progress = False
         
     async def authenticate(self):
         """Authenticate with Paradigm API"""
@@ -140,6 +144,8 @@ class ProductionInventoryManager:
                 
                 if response.status_code == 200:
                     logger.info(f"✅ Updated {product_id} to quantity {new_quantity}")
+                    # Also update local database immediately
+                    await self.update_local_item_quantity(product_id, new_quantity)
                     return {"success": True, "product_id": product_id, "new_quantity": new_quantity}
                 else:
                     logger.error(f"❌ UpdateItem failed: {response.status_code} - {response.text}")
@@ -149,8 +155,26 @@ class ProductionInventoryManager:
             logger.error(f"❌ UpdateItem error: {e}")
             return {"error": str(e)}
     
+    async def update_local_item_quantity(self, product_id: str, new_quantity: int):
+        """Update item quantity in local database"""
+        try:
+            async with aiosqlite.connect(DB_PATH) as db:
+                await db.execute('''
+                    UPDATE inventory 
+                    SET current_quantity = ?, last_updated = ?
+                    WHERE product_id = ?
+                ''', (new_quantity, datetime.now(), product_id))
+                await db.commit()
+                logger.info(f"✅ Updated local database: {product_id} = {new_quantity}")
+        except Exception as e:
+            logger.error(f"❌ Local update error: {e}")
+    
     async def sync_to_local_database(self):
-        """Sync Paradigm data to local database"""
+        """Sync Paradigm data to local database - BACKGROUND SYNC"""
+        if self.sync_in_progress:
+            return {"error": "Sync already in progress"}
+        
+        self.sync_in_progress = True
         try:
             # Get items from Paradigm
             response = await self.get_inventory_items(0, 50000) # Use a large take for sync
@@ -166,6 +190,8 @@ class ProductionInventoryManager:
                         product_id TEXT PRIMARY KEY,
                         description TEXT,
                         current_quantity INTEGER,
+                        unit_measure TEXT,
+                        category TEXT,
                         last_updated TIMESTAMP
                     )
                 ''')
@@ -174,28 +200,92 @@ class ProductionInventoryManager:
                     product_id = item.get("strProductID")
                     description = item.get("memDescription")
                     quantity = item.get("decUnitsInStock") or 0
+                    unit_measure = item.get("strUnitMeasure")
+                    category = item.get("strCategory")
                     
                     if product_id:
                         await db.execute('''
                             INSERT OR REPLACE INTO inventory 
-                            (product_id, description, current_quantity, last_updated)
-                            VALUES (?, ?, ?, ?)
-                        ''', (product_id, description, quantity, datetime.now()))
+                            (product_id, description, current_quantity, unit_measure, category, last_updated)
+                            VALUES (?, ?, ?, ?, ?, ?)
+                        ''', (product_id, description, quantity, unit_measure, category, datetime.now()))
                 
                 await db.commit()
             
+            self.last_sync_time = datetime.now()
             logger.info(f"✅ Synced {len(items)} items to local database")
             return {"success": True, "items_synced": len(items)}
             
         except Exception as e:
             logger.error(f"❌ Sync error: {e}")
             return {"error": str(e)}
+        finally:
+            self.sync_in_progress = False
+    
+    async def search_local_inventory(self, search_term: str):
+        """Fast local search through synced inventory"""
+        try:
+            async with aiosqlite.connect(DB_PATH) as db:
+                cursor = await db.execute('''
+                    SELECT product_id, description, current_quantity, unit_measure, category
+                    FROM inventory 
+                    WHERE product_id LIKE ? OR description LIKE ? OR category LIKE ?
+                    ORDER BY product_id
+                    LIMIT 100
+                ''', (f"%{search_term}%", f"%{search_term}%", f"%{search_term}%"))
+                
+                rows = await cursor.fetchall()
+                
+                items = []
+                for row in rows:
+                    items.append({
+                        "product_id": row[0],
+                        "description": row[1],
+                        "current_quantity": row[2],
+                        "unit_measure": row[3],
+                        "category": row[4]
+                    })
+                
+                return {"success": True, "items": items, "count": len(items)}
+                
+        except Exception as e:
+            logger.error(f"❌ Local search error: {e}")
+            return {"error": str(e)}
+    
+    async def get_sync_status(self):
+        """Get sync status and timing"""
+        return {
+            "last_sync": self.last_sync_time.isoformat() if self.last_sync_time else None,
+            "sync_in_progress": self.sync_in_progress,
+            "next_sync": (self.last_sync_time + timedelta(hours=1)).isoformat() if self.last_sync_time else None
+        }
 
 # Initialize inventory manager
 inventory_manager = ProductionInventoryManager()
 
+# Background sync thread
+def background_sync_worker():
+    """Background worker that syncs data every hour"""
+    while True:
+        try:
+            # Run sync in async context
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            loop.run_until_complete(inventory_manager.sync_to_local_database())
+            loop.close()
+            logger.info("🔄 Background sync completed")
+        except Exception as e:
+            logger.error(f"❌ Background sync error: {e}")
+        
+        # Wait 1 hour before next sync
+        time.sleep(3600)  # 1 hour
+
+# Start background sync thread
+sync_thread = threading.Thread(target=background_sync_worker, daemon=True)
+sync_thread.start()
+
 # Create FastAPI app
-app = FastAPI(title="Greenfield Metal Sales Inventory System", version="2.4")
+app = FastAPI(title="Greenfield Metal Sales Inventory System", version="2.5")
 
 # Add CORS middleware
 app.add_middleware(
@@ -209,7 +299,7 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_event():
     """Initialize system on startup"""
-    logger.info("🚀 Starting Greenfield Metal Sales Inventory System v2.4")
+    logger.info("🚀 Starting Greenfield Metal Sales Inventory System v2.5")
     
     # Initialize database
     try:
@@ -219,6 +309,8 @@ async def startup_event():
                     product_id TEXT PRIMARY KEY,
                     description TEXT,
                     current_quantity INTEGER,
+                    unit_measure TEXT,
+                    category TEXT,
                     last_updated TIMESTAMP
                 )
             ''')
@@ -227,10 +319,16 @@ async def startup_event():
     except Exception as e:
         logger.error(f"❌ Database initialization failed: {e}")
     
-    # Test Paradigm connection
+    # Test Paradigm connection and do initial sync
     auth_result = await inventory_manager.authenticate()
     if auth_result:
         logger.info("✅ Paradigm API connection successful")
+        # Do initial sync
+        sync_result = await inventory_manager.sync_to_local_database()
+        if sync_result.get("success"):
+            logger.info(f"✅ Initial sync completed: {sync_result.get('items_synced')} items")
+        else:
+            logger.error(f"❌ Initial sync failed: {sync_result.get('error')}")
     else:
         logger.error("❌ Paradigm API connection failed")
 
@@ -596,7 +694,7 @@ async def main_page():
             <div class="header">
                 <h1><i class="fas fa-industry"></i> Greenfield Metal Sales</h1>
                 <p>AI-Powered Inventory Management System <span class="version-badge">v2.5</span></p>
-                <p>24/7 Cloud-Hosted with Real-Time Paradigm ERP Integration</p>
+                <p>24/7 Cloud-Hosted with Background Sync & Instant Search</p>
             </div>
             
             <div class="stats-section">
@@ -687,7 +785,9 @@ async def main_page():
                     }
                     
                     if (data.last_sync) {
-                        document.getElementById('lastSync').textContent = 'Active';
+                        const lastSync = new Date(data.last_sync);
+                        const timeAgo = getTimeAgo(lastSync);
+                        document.getElementById('lastSync').textContent = timeAgo;
                     } else {
                         document.getElementById('lastSync').textContent = 'Never';
                     }
@@ -698,6 +798,19 @@ async def main_page():
                 } catch (error) {
                     console.error('Error loading stats:', error);
                 }
+            }
+            
+            function getTimeAgo(date) {
+                const now = new Date();
+                const diffMs = now - date;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMs / 3600000);
+                const diffDays = Math.floor(diffMs / 86400000);
+                
+                if (diffMins < 1) return 'Just now';
+                if (diffMins < 60) return `${diffMins}m ago`;
+                if (diffHours < 24) return `${diffHours}h ago`;
+                return `${diffDays}d ago`;
             }
             
             async function searchProducts() {
@@ -712,7 +825,7 @@ async def main_page():
                 resultsContainer.classList.add('active');
                 
                 try {
-                    const response = await fetch(`/api/paradigm/search?q=${encodeURIComponent(searchTerm)}`);
+                    const response = await fetch(`/api/search?q=${encodeURIComponent(searchTerm)}`);
                     const data = await response.json();
                     
                     if (data.success && data.items && data.items.length > 0) {
@@ -839,7 +952,7 @@ async def main_page():
                     const response = await fetch('/api/paradigm/items?skip=0&take=50000');
                     const data = await response.json();
                     if (data.success) {
-                        alert(`✅ Successfully retrieved ${data.count.toLocaleString()} items from Paradigm!`);
+                        alert(`✅ Successfully retrieved ${data.count.toLocaleString()} items from Paradigm!\n\n📊 System now has ${data.count.toLocaleString()} items available for instant search.\n🔄 Background sync runs every hour automatically.`);
                     } else {
                         alert('❌ Failed to get items: ' + (data.error || 'Unknown error'));
                     }
@@ -853,7 +966,7 @@ async def main_page():
                     const response = await fetch('/api/paradigm/sync', {method: 'POST'});
                     const data = await response.json();
                     if (data.success) {
-                        alert(`✅ Successfully synced ${data.items_synced.toLocaleString()} items to database!`);
+                        alert(`✅ Successfully synced ${data.items_synced.toLocaleString()} items to database!\n\n🔄 Background sync will continue every hour automatically.\n⚡ Search is now instant using local data.`);
                         loadStats(); // Refresh stats
                     } else {
                         alert('❌ Sync failed: ' + (data.error || 'Unknown error'));
@@ -910,11 +1023,15 @@ async def get_stats():
             last_update = await cursor.fetchone()
             last_updated = last_update[0] if last_update and last_update[0] else "Never"
         
+        sync_status = await inventory_manager.get_sync_status()
+        
         return {
             "total_items": item_count,
-            "last_sync": last_updated,
+            "last_sync": sync_status["last_sync"],
+            "next_sync": sync_status["next_sync"],
+            "sync_in_progress": sync_status["sync_in_progress"],
             "paradigm_connected": inventory_manager.auth_token is not None,
-            "version": "2.4"
+            "version": "2.5"
         }
     except Exception as e:
         logger.error(f"Stats error: {e}")
@@ -928,8 +1045,18 @@ async def test_paradigm_auth():
 
 @app.get("/api/paradigm/items")
 async def get_paradigm_items(skip: int = 0, take: int = 100):
-    """Get items from Paradigm"""
-    return await inventory_manager.get_inventory_items(skip, take)
+    """Get items from Paradigm - now triggers a sync first"""
+    try:
+        # First sync to ensure we have latest data
+        sync_result = await inventory_manager.sync_to_local_database()
+        if not sync_result.get("success"):
+            return sync_result
+        
+        # Then return local data for fast response
+        return await inventory_manager.search_local_inventory("")
+    except Exception as e:
+        logger.error(f"Get items error: {e}")
+        return {"error": str(e)}
 
 @app.post("/api/paradigm/update-quantity")
 async def update_paradigm_quantity(request: Request):
@@ -949,7 +1076,7 @@ async def update_paradigm_quantity(request: Request):
 
 @app.post("/api/paradigm/sync")
 async def sync_paradigm_data():
-    """Sync Paradigm data to local database"""
+    """Manual sync Paradigm data to local database"""
     return await inventory_manager.sync_to_local_database()
 
 @app.post("/api/paradigm/update-inventory")
@@ -978,67 +1105,13 @@ async def update_inventory_quantity(request: Request):
 
 @app.get("/api/search")
 async def search_inventory(q: str):
-    """Search local inventory"""
-    try:
-        async with aiosqlite.connect(DB_PATH) as db:
-            cursor = await db.execute(
-                "SELECT * FROM inventory WHERE product_id LIKE ? OR description LIKE ?",
-                (f"%{q}%", f"%{q}%")
-            )
-            rows = await cursor.fetchall()
-            
-            items = []
-            for row in rows:
-                items.append({
-                    "product_id": row[0],
-                    "description": row[1],
-                    "quantity": row[2],
-                    "last_updated": row[3]
-                })
-            
-            return {"success": True, "items": items, "count": len(items)}
-    except Exception as e:
-        logger.error(f"Search error: {e}")
-        return {"error": str(e)}
+    """Fast local search through synced inventory"""
+    return await inventory_manager.search_local_inventory(q)
 
 @app.get("/api/paradigm/search")
 async def search_paradigm_items(q: str):
-    """Search for items in Paradigm by partial name or ID"""
-    try:
-        # Get ALL items from Paradigm
-        response = await inventory_manager.get_inventory_items(0, 50000)
-        if "error" in response:
-            return response
-        
-        items = response.get("items", [])
-        
-        # Search through items
-        search_term = q.lower()
-        matching_items = []
-        
-        for item in items:
-            product_id = (item.get("strProductID") or "").lower()
-            description = (item.get("memDescription") or "").lower()
-            
-            if search_term in product_id or search_term in description:
-                matching_items.append({
-                    "product_id": item.get("strProductID"),
-                    "description": item.get("memDescription"),
-                    "current_quantity": item.get("decUnitsInStock", 0),
-                    "unit_measure": item.get("strUnitMeasure"),
-                    "category": item.get("strCategory")
-                })
-        
-        return {
-            "success": True, 
-            "search_term": q,
-            "items": matching_items, 
-            "count": len(matching_items)
-        }
-        
-    except Exception as e:
-        logger.error(f"Paradigm search error: {e}")
-        return {"error": str(e)}
+    """Search for items in Paradigm - now uses fast local search"""
+    return await inventory_manager.search_local_inventory(q)
 
 @app.get("/test-webhook")
 async def test_webhook():
