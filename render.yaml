@@ -3,7 +3,7 @@ services:
     name: greenfield-inventory-system
     runtime: python
     buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn production_app_fixed:app --host 0.0.0.0 --port $PORT
+    startCommand: uvicorn production_app_fixed:app --host 0.0.0.0 --port $PORT --reload
     envVars:
       - key: PARADIGM_API_KEY
         value: nVPsQFBteV&GEd7*8n0%RliVjksag8
@@ -11,3 +11,5 @@ services:
         value: web_admin
       - key: PARADIGM_PASSWORD
         value: ChangeMe#123!
+      - key: PYTHON_VERSION
+        value: 3.11.0
