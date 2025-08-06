@@ -337,16 +337,24 @@ async def startup_event():
     except Exception as e:
         logger.error(f"❌ Database initialization failed: {e}")
     
-    # Test Paradigm connection and do initial sync
+    # Test Paradigm connection and do IMMEDIATE sync
     auth_result = await inventory_manager.authenticate()
     if auth_result:
         logger.info("✅ Paradigm API connection successful")
-        # Do initial sync
+        # FORCE immediate sync on startup
+        logger.info("🔄 FORCING immediate sync on startup...")
         sync_result = await inventory_manager.sync_to_local_database()
         if sync_result.get("success"):
-            logger.info(f"✅ Initial sync completed: {sync_result.get('items_synced')} items")
+            logger.info(f"✅ STARTUP SYNC COMPLETED: {sync_result.get('items_synced')} items")
         else:
-            logger.error(f"❌ Initial sync failed: {sync_result.get('error')}")
+            logger.error(f"❌ STARTUP SYNC FAILED: {sync_result.get('error')}")
+            # Try again once more
+            logger.info("🔄 Retrying sync...")
+            retry_sync = await inventory_manager.sync_to_local_database()
+            if retry_sync.get("success"):
+                logger.info(f"✅ RETRY SYNC SUCCESSFUL: {retry_sync.get('items_synced')} items")
+            else:
+                logger.error(f"❌ RETRY SYNC ALSO FAILED: {retry_sync.get('error')}")
     else:
         logger.error("❌ Paradigm API connection failed")
 
@@ -1109,7 +1117,27 @@ async def update_paradigm_quantity(request: Request):
 @app.post("/api/paradigm/sync")
 async def sync_paradigm_data():
     """Manual sync Paradigm data to local database"""
-    return await inventory_manager.sync_to_local_database()
+    logger.info("🔄 MANUAL SYNC REQUESTED")
+    result = await inventory_manager.sync_to_local_database()
+    logger.info(f"🔄 MANUAL SYNC RESULT: {result}")
+    return result
+
+@app.post("/api/emergency-sync")
+async def emergency_sync():
+    """EMERGENCY sync - forces authentication and sync"""
+    logger.info("🚨 EMERGENCY SYNC REQUESTED")
+    
+    # Force re-authentication
+    auth_result = await inventory_manager.authenticate()
+    if not auth_result:
+        logger.error("❌ EMERGENCY SYNC: Authentication failed")
+        return {"error": "Emergency sync failed: Authentication error"}
+    
+    # Force sync
+    sync_result = await inventory_manager.sync_to_local_database()
+    logger.info(f"🚨 EMERGENCY SYNC RESULT: {sync_result}")
+    
+    return {"emergency_sync": True, "result": sync_result}
 
 @app.post("/api/paradigm/update-inventory")
 async def update_inventory_quantity(request: Request):
