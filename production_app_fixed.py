@@ -243,7 +243,7 @@ async def main_page():
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Greenfield Metal Sales - Production Inventory System v2.4</title>
+        <title>Greenfield Metal Sales - Production Inventory System v2.5</title>
         <style>
             body {
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -399,7 +399,7 @@ async def main_page():
         <div class="container">
             <div class="header">
                 <h1>🏭 Greenfield Metal Sales</h1>
-                <p>Production Inventory Management System <span class="version-badge">v2.4</span></p>
+                <p>Production Inventory Management System <span class="version-badge">v2.5</span></p>
                 <p>24/7 Cloud-Hosted with Real-Time Paradigm ERP Integration</p>
             </div>
             
@@ -482,7 +482,7 @@ async def main_page():
             
             <div class="footer">
                 <p>© 2024 Greenfield Metal Sales - AI-Powered Inventory Management System</p>
-                <p>Production Environment | Version 2.4 | Render.com Deployment</p>
+                <p>Production Environment | Version 2.5 | Render.com Deployment</p>
             </div>
         </div>
         
@@ -552,7 +552,7 @@ async def health_check():
     """Health check endpoint"""
     return {
         "status": "healthy",
-        "version": "2.4",
+        "version": "2.5",
         "timestamp": datetime.now().isoformat(),
         "service": "Greenfield Metal Sales Inventory System",
         "environment": "production",
