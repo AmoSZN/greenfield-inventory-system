@@ -28,10 +28,10 @@ Click "Environment" tab and add these variables:
 
 ```
 PARADIGM_BASE_URL=https://greenfieldapi.para-apps.com
-PARADIGM_API_KEY=nVPsQFBteV&GEd7*8n0%RliVjksag8
+PARADIGM_API_KEY=YOUR_PARADIGM_API_KEY_HERE
 PARADIGM_USERNAME=mattamundson
 PARADIGM_PASSWORD=Morrison216!
-ANTHROPIC_API_KEY=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
+ANTHROPIC_API_KEY=YOUR_ANTHROPIC_API_KEY_HERE
 ```
 
 ### **STEP 5: Deploy**
