@@ -69,8 +69,8 @@ class ProductionInventoryManager:
             logger.error(f"❌ Authentication error: {e}")
             return False
     
-    async def get_inventory_items(self, skip: int = 0, take: int = 100):
-        """Get inventory items from Paradigm"""
+    async def get_inventory_items(self, skip: int = 0, take: int = 10000):
+        """Get inventory items from Paradigm - now retrieves ALL items"""
         if not self.auth_token:
             if not await self.authenticate():
                 return {"error": "Authentication failed"}
@@ -82,6 +82,7 @@ class ProductionInventoryManager:
                     "X-API-Key": self.api_key
                 }
                 
+                # Use a very large take value to get ALL items
                 response = await client.get(
                     f"{self.base_url}/api/Items/GetItems/{skip}/{take}",
                     headers=headers
@@ -89,7 +90,7 @@ class ProductionInventoryManager:
                 
                 if response.status_code == 200:
                     items = response.json()
-                    logger.info(f"✅ Retrieved {len(items)} items from Paradigm")
+                    logger.info(f"✅ Retrieved {len(items)} items from Paradigm (ALL products)")
                     return {"success": True, "items": items, "count": len(items)}
                 else:
                     logger.error(f"❌ GetItems failed: {response.status_code} - {response.text}")
@@ -106,12 +107,12 @@ class ProductionInventoryManager:
                 return {"error": "Authentication failed"}
         
         try:
-            # First get the current item to update it
-            items_response = await self.get_inventory_items(0, 1000)
+            # Get ALL items from Paradigm to find the one to update
+            items_response = await self.get_inventory_items(0, 10000)
             if "error" in items_response:
                 return items_response
             
-            # Find the item to update
+            # Find the item to update among ALL items
             current_item = None
             for item in items_response.get("items", []):
                 if item.get("strProductID") == product_id:
@@ -119,7 +120,7 @@ class ProductionInventoryManager:
                     break
             
             if not current_item:
-                return {"error": f"Item {product_id} not found"}
+                return {"error": f"Item {product_id} not found in Paradigm inventory"}
             
             # Update the quantity using the correct Paradigm field name
             current_item["decUnitsInStock"] = new_quantity
@@ -152,7 +153,7 @@ class ProductionInventoryManager:
         """Sync Paradigm data to local database"""
         try:
             # Get items from Paradigm
-            response = await self.get_inventory_items(0, 1000)
+            response = await self.get_inventory_items(0, 10000) # Use a large take for sync
             if "error" in response:
                 return response
             
@@ -426,8 +427,9 @@ async def main_page():
                     <h3>🧪 TEST PARADIGM INTEGRATION</h3>
                     <p>Click the buttons below to test the Paradigm API integration:</p>
                     <button class="test-button" onclick="testAuth()">🔐 Test Authentication</button>
-                    <button class="test-button" onclick="testGetItems()">📦 Get Inventory Items</button>
-                    <button class="test-button" onclick="testUpdateItem()">✏️ Update Item (1015AW to 150)</button>
+                    <button class="test-button" onclick="testGetItems()">📦 Get ALL Inventory Items</button>
+                    <button class="test-button" onclick="testSearch()">🔍 Search Products</button>
+                    <button class="test-button" onclick="testUpdateItem()">✏️ Update Item (CO4129QQ to 150)</button>
                     <button class="test-button" onclick="testSync()">🔄 Sync to Local DB</button>
                     <div id="testResults"></div>
                 </div>
@@ -446,8 +448,13 @@ async def main_page():
                     </div>
                     
                     <div class="endpoint">
-                        <h4>Get Paradigm Items</h4>
-                        <p>GET /api/paradigm/items?skip=0&take=100</p>
+                        <h4>Get ALL Paradigm Items</h4>
+                        <p>GET /api/paradigm/items?skip=0&take=10000</p>
+                    </div>
+                    
+                    <div class="endpoint">
+                        <h4>Search Paradigm Products</h4>
+                        <p>GET /api/paradigm/search?q={search_term}</p>
                     </div>
                     
                     <div class="endpoint">
@@ -501,14 +508,27 @@ async def main_page():
             
             async function testGetItems() {
                 const results = document.getElementById('testResults');
-                results.innerHTML = '<div class="result">📦 Getting inventory items...</div>';
+                results.innerHTML = '<div class="result">📦 Getting ALL inventory items from Paradigm...</div>';
                 
                 try {
-                    const response = await fetch('/api/paradigm/items?skip=0&take=10');
+                    const response = await fetch('/api/paradigm/items?skip=0&take=10000');
                     const data = await response.json();
-                    results.innerHTML = `<div class="result ${data.success ? 'success' : 'error'}">📦 Items Result: ${JSON.stringify(data, null, 2)}</div>`;
+                    results.innerHTML = `<div class="result ${data.success ? 'success' : 'error'}">📦 Items Result: Retrieved ${data.count} items from Paradigm. First 3 items: ${JSON.stringify(data.items.slice(0, 3), null, 2)}</div>`;
                 } catch (error) {
                     results.innerHTML = `<div class="result error">❌ GetItems Error: ${error}</div>`;
+                }
+            }
+            
+            async function testSearch() {
+                const results = document.getElementById('testResults');
+                results.innerHTML = '<div class="result">🔍 Searching for products containing "COIL"...</div>';
+                
+                try {
+                    const response = await fetch('/api/paradigm/search?q=COIL');
+                    const data = await response.json();
+                    results.innerHTML = `<div class="result ${data.success ? 'success' : 'error'}">🔍 Search Result: Found ${data.count} items containing "COIL". Items: ${JSON.stringify(data.items, null, 2)}</div>`;
+                } catch (error) {
+                    results.innerHTML = `<div class="result error">❌ Search Error: ${error}</div>`;
                 }
             }
             
@@ -636,6 +656,45 @@ async def search_inventory(q: str):
             return {"success": True, "items": items, "count": len(items)}
     except Exception as e:
         logger.error(f"Search error: {e}")
+        return {"error": str(e)}
+
+@app.get("/api/paradigm/search")
+async def search_paradigm_items(q: str):
+    """Search for items in Paradigm by partial name or ID"""
+    try:
+        # Get ALL items from Paradigm
+        response = await inventory_manager.get_inventory_items(0, 10000)
+        if "error" in response:
+            return response
+        
+        items = response.get("items", [])
+        
+        # Search through items
+        search_term = q.lower()
+        matching_items = []
+        
+        for item in items:
+            product_id = item.get("strProductID", "").lower()
+            description = item.get("memDescription", "").lower()
+            
+            if search_term in product_id or search_term in description:
+                matching_items.append({
+                    "product_id": item.get("strProductID"),
+                    "description": item.get("memDescription"),
+                    "current_quantity": item.get("decUnitsInStock", 0),
+                    "unit_measure": item.get("strUnitMeasure"),
+                    "category": item.get("strCategory")
+                })
+        
+        return {
+            "success": True, 
+            "search_term": q,
+            "items": matching_items, 
+            "count": len(matching_items)
+        }
+        
+    except Exception as e:
+        logger.error(f"Paradigm search error: {e}")
         return {"error": str(e)}
 
 @app.get("/test-webhook")
