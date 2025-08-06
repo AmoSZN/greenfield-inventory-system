@@ -190,19 +190,31 @@ class ProductionInventoryManager:
     async def sync_to_local_database(self):
         """Sync Paradigm data to local database - BACKGROUND SYNC"""
         if self.sync_in_progress:
+            logger.warning("⚠️ Sync already in progress")
             return {"error": "Sync already in progress"}
         
         self.sync_in_progress = True
+        logger.info("🔄 Starting sync to local database...")
+        
         try:
             # Get items from Paradigm
+            logger.info("📦 Getting items from Paradigm...")
             response = await self.get_inventory_items(0, 50000) # Use a large take for sync
             if "error" in response:
+                logger.error(f"❌ Failed to get items from Paradigm: {response}")
                 return response
             
             items = response.get("items", [])
+            logger.info(f"📦 Retrieved {len(items)} items from Paradigm")
+            
+            if len(items) == 0:
+                logger.error("❌ No items received from Paradigm!")
+                return {"error": "No items received from Paradigm"}
             
             # Update local database
+            logger.info("💾 Updating local database...")
             async with aiosqlite.connect(DB_PATH) as db:
+                # Create table
                 await db.execute('''
                     CREATE TABLE IF NOT EXISTS inventory (
                         product_id TEXT PRIMARY KEY,
@@ -213,32 +225,51 @@ class ProductionInventoryManager:
                         last_updated TIMESTAMP
                     )
                 ''')
+                logger.info("✅ Database table created/verified")
                 
+                processed_count = 0
                 for item in items:
-                    product_id = item.get("strProductID")
-                    description = item.get("memDescription")
-                    quantity = item.get("decUnitsInStock") or 0
-                    unit_measure = item.get("strUnitMeasure")
-                    category = item.get("strCategory")
+                    try:
+                        product_id = item.get("strProductID")
+                        description = item.get("memDescription")
+                        quantity = item.get("decUnitsInStock") or 0
+                        unit_measure = item.get("strUnitMeasure")
+                        category = item.get("strCategory")
+                        
+                        if product_id:
+                            await db.execute('''
+                                INSERT OR REPLACE INTO inventory 
+                                (product_id, description, current_quantity, unit_measure, category, last_updated)
+                                VALUES (?, ?, ?, ?, ?, ?)
+                            ''', (product_id, description, quantity, unit_measure, category, datetime.now()))
+                            processed_count += 1
+                        else:
+                            logger.warning(f"⚠️ Item missing product_id: {item}")
                     
-                    if product_id:
-                        await db.execute('''
-                            INSERT OR REPLACE INTO inventory 
-                            (product_id, description, current_quantity, unit_measure, category, last_updated)
-                            VALUES (?, ?, ?, ?, ?, ?)
-                        ''', (product_id, description, quantity, unit_measure, category, datetime.now()))
+                    except Exception as item_error:
+                        logger.error(f"❌ Error processing item: {item_error}")
                 
                 await db.commit()
+                logger.info(f"💾 Database commit completed - {processed_count} items processed")
+                
+                # Verify data was inserted
+                cursor = await db.execute("SELECT COUNT(*) FROM inventory")
+                count = await cursor.fetchone()
+                db_count = count[0] if count else 0
+                logger.info(f"🔍 Database verification: {db_count} items in database")
             
             self.last_sync_time = datetime.now()
-            logger.info(f"✅ Synced {len(items)} items to local database")
-            return {"success": True, "items_synced": len(items)}
+            logger.info(f"✅ Sync completed successfully: {processed_count} items synced, {db_count} in database")
+            return {"success": True, "items_synced": processed_count, "database_count": db_count}
             
         except Exception as e:
             logger.error(f"❌ Sync error: {e}")
-            return {"error": str(e)}
+            import traceback
+            logger.error(f"❌ Sync traceback: {traceback.format_exc()}")
+            return {"error": f"Sync failed: {str(e)}"}
         finally:
             self.sync_in_progress = False
+            logger.info("🔄 Sync process completed")
     
     async def search_local_inventory(self, search_term: str):
         """Fast local search through synced inventory"""
@@ -1118,9 +1149,25 @@ async def update_paradigm_quantity(request: Request):
 async def sync_paradigm_data():
     """Manual sync Paradigm data to local database"""
     logger.info("🔄 MANUAL SYNC REQUESTED")
-    result = await inventory_manager.sync_to_local_database()
-    logger.info(f"🔄 MANUAL SYNC RESULT: {result}")
-    return result
+    try:
+        result = await inventory_manager.sync_to_local_database()
+        logger.info(f"🔄 MANUAL SYNC RESULT: {result}")
+        
+        # If result is None or empty, that's a problem
+        if result is None:
+            logger.error("❌ MANUAL SYNC: Result is None")
+            return {"error": "Sync returned None result"}
+        
+        if not result:
+            logger.error("❌ MANUAL SYNC: Result is empty")
+            return {"error": "Sync returned empty result"}
+        
+        return result
+    except Exception as e:
+        logger.error(f"❌ MANUAL SYNC EXCEPTION: {e}")
+        import traceback
+        logger.error(f"❌ MANUAL SYNC TRACEBACK: {traceback.format_exc()}")
+        return {"error": f"Manual sync failed: {str(e)}"}
 
 @app.post("/api/emergency-sync")
 async def emergency_sync():
