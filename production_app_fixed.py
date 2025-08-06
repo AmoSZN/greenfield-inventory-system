@@ -202,116 +202,218 @@ app = FastAPI(title="Greenfield Metal Sales - Production Inventory System v2.1",
 @app.get("/", response_class=HTMLResponse)
 async def main_page():
     """Main dashboard page"""
-    return """
+    return HTML("""
     <!DOCTYPE html>
-    <html>
+    <html lang="en">
     <head>
-        <title>Greenfield Metal Sales - Production Inventory v2.1</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Greenfield Metal Sales - Production Inventory Management System v2.3</title>
         <style>
-            body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
-            .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-            h1 { color: #2c3e50; text-align: center; }
-            .status { padding: 15px; margin: 20px 0; border-radius: 5px; }
-            .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-            .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-            .button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
-            .button:hover { background: #0056b3; }
-            .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 20px 0; }
-            .stat-card { background: #f8f9fa; padding: 20px; border-radius: 5px; text-align: center; }
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                margin: 0;
+                padding: 20px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: #333;
+                min-height: 100vh;
+            }
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 15px;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                overflow: hidden;
+            }
+            .header {
+                background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+                color: white;
+                padding: 30px;
+                text-align: center;
+            }
+            .header h1 {
+                margin: 0;
+                font-size: 2.5em;
+                font-weight: 300;
+            }
+            .header p {
+                margin: 10px 0 0 0;
+                opacity: 0.9;
+                font-size: 1.1em;
+            }
+            .content {
+                padding: 40px;
+            }
+            .status-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 20px;
+                margin-bottom: 30px;
+            }
+            .status-card {
+                background: #f8f9fa;
+                border-radius: 10px;
+                padding: 25px;
+                border-left: 5px solid #28a745;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            }
+            .status-card h3 {
+                margin: 0 0 15px 0;
+                color: #2c3e50;
+                font-size: 1.3em;
+            }
+            .status-card p {
+                margin: 0;
+                color: #666;
+                line-height: 1.6;
+            }
+            .api-section {
+                background: #f8f9fa;
+                border-radius: 10px;
+                padding: 25px;
+                margin-bottom: 20px;
+            }
+            .api-section h3 {
+                margin: 0 0 20px 0;
+                color: #2c3e50;
+                border-bottom: 2px solid #3498db;
+                padding-bottom: 10px;
+            }
+            .endpoint {
+                background: white;
+                border-radius: 8px;
+                padding: 15px;
+                margin-bottom: 15px;
+                border-left: 4px solid #3498db;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            }
+            .endpoint h4 {
+                margin: 0 0 10px 0;
+                color: #2c3e50;
+                font-size: 1.1em;
+            }
+            .endpoint p {
+                margin: 0;
+                color: #666;
+                font-family: 'Courier New', monospace;
+                background: #f1f3f4;
+                padding: 8px;
+                border-radius: 4px;
+                font-size: 0.9em;
+            }
+            .version-badge {
+                display: inline-block;
+                background: #e74c3c;
+                color: white;
+                padding: 5px 12px;
+                border-radius: 20px;
+                font-size: 0.8em;
+                font-weight: bold;
+                margin-left: 10px;
+            }
+            .footer {
+                background: #2c3e50;
+                color: white;
+                text-align: center;
+                padding: 20px;
+                font-size: 0.9em;
+            }
         </style>
     </head>
     <body>
         <div class="container">
-            <h1>🏭 Greenfield Metal Sales</h1>
-            <h2>Production Inventory Management System v2.2-1754471211</h2>
-            
-            <div class="status success">
-                ✅ System Status: OPERATIONAL<br>
-                🌐 Production URL: https://greenfield-inventory-system.onrender.com<br>
-                🔗 Paradigm Integration: ACTIVE<br>
-                📊 Database: FIXED
+            <div class="header">
+                <h1>🏭 Greenfield Metal Sales</h1>
+                <p>Production Inventory Management System <span class="version-badge">v2.3</span></p>
+                <p>24/7 Cloud-Hosted with Real-Time Paradigm ERP Integration</p>
             </div>
             
-            <div class="stats">
-                <div class="stat-card">
-                    <h3>📊 System Stats</h3>
-                    <p><a href="/api/stats" class="button">View Stats</a></p>
+            <div class="content">
+                <div class="status-grid">
+                    <div class="status-card">
+                        <h3>✅ System Status</h3>
+                        <p>Production system is running and fully operational with all features enabled.</p>
+                    </div>
+                    <div class="status-card">
+                        <h3>🌐 Deployment</h3>
+                        <p>Successfully deployed on Render.com with continuous integration and automatic updates.</p>
+                    </div>
+                    <div class="status-card">
+                        <h3>🔗 Paradigm Integration</h3>
+                        <p>Real-time synchronization with Paradigm ERP system for live inventory updates.</p>
+                    </div>
+                    <div class="status-card">
+                        <h3>📊 Database</h3>
+                        <p>SQLite database initialized with all required tables and sample inventory data.</p>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <h3>🔄 Sync Inventory</h3>
-                    <p><a href="/api/sync" class="button">Sync from Paradigm</a></p>
+                
+                <div class="api-section">
+                    <h3>🔌 Available API Endpoints</h3>
+                    
+                    <div class="endpoint">
+                        <h4>Health Check</h4>
+                        <p>GET /health</p>
+                    </div>
+                    
+                    <div class="endpoint">
+                        <h4>System Statistics</h4>
+                        <p>GET /api/stats</p>
+                    </div>
+                    
+                    <div class="endpoint">
+                        <h4>Search Inventory</h4>
+                        <p>GET /api/search?q={search_term}</p>
+                    </div>
+                    
+                    <div class="endpoint">
+                        <h4>Update Item Quantity</h4>
+                        <p>POST /api/update-quantity</p>
+                    </div>
+                    
+                    <div class="endpoint">
+                        <h4>Sync from Paradigm</h4>
+                        <p>POST /api/sync-paradigm</p>
+                    </div>
+                    
+                    <div class="endpoint">
+                        <h4>Webhook Test</h4>
+                        <p>GET /test-webhook</p>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <h3>🔗 Webhook Test</h3>
-                    <p><a href="/test-webhook" class="button">Test Webhook</a></p>
-                </div>
-                <div class="stat-card">
-                    <h3>💚 Health Check</h3>
-                    <p><a href="/health" class="button">Health Status</a></p>
+                
+                <div class="api-section">
+                    <h3>🚀 Key Features</h3>
+                    <ul style="color: #666; line-height: 1.8;">
+                        <li><strong>Real-time Paradigm ERP Integration:</strong> Live inventory synchronization</li>
+                        <li><strong>Advanced Search:</strong> Natural language processing for inventory queries</li>
+                        <li><strong>Webhook Support:</strong> BarTender label printing integration</li>
+                        <li><strong>24/7 Availability:</strong> Cloud-hosted with automatic scaling</li>
+                        <li><strong>Database Management:</strong> Automatic table creation and data initialization</li>
+                        <li><strong>API-First Design:</strong> RESTful endpoints for all operations</li>
+                    </ul>
                 </div>
             </div>
             
-            <h3>🎯 Quick Actions:</h3>
-            <button class="button" onclick="syncInventory()">🔄 Sync from Paradigm</button>
-            <button class="button" onclick="checkHealth()">💚 Check Health</button>
-            <button class="button" onclick="viewStats()">📊 View Stats</button>
-            
-            <div id="results" style="margin-top: 20px;"></div>
+            <div class="footer">
+                <p>© 2024 Greenfield Metal Sales - AI-Powered Inventory Management System</p>
+                <p>Production Environment | Version 2.3 | Render.com Deployment</p>
+            </div>
         </div>
-        
-        <script>
-            async function syncInventory() {
-                const results = document.getElementById('results');
-                results.innerHTML = '🔄 Syncing inventory from Paradigm...';
-                
-                try {
-                    const response = await fetch('/api/sync', {method: 'POST'});
-                    const data = await response.json();
-                    results.innerHTML = `<div class="status success">✅ Sync Result: ${JSON.stringify(data, null, 2)}</div>`;
-                } catch (error) {
-                    results.innerHTML = `<div class="status error">❌ Sync Error: ${error}</div>`;
-                }
-            }
-            
-            async function checkHealth() {
-                const results = document.getElementById('results');
-                results.innerHTML = '💚 Checking system health...';
-                
-                try {
-                    const response = await fetch('/health');
-                    const data = await response.json();
-                    results.innerHTML = `<div class="status success">✅ Health Check: ${JSON.stringify(data, null, 2)}</div>`;
-                } catch (error) {
-                    results.innerHTML = `<div class="status error">❌ Health Check Error: ${error}</div>`;
-                }
-            }
-            
-            async function viewStats() {
-                const results = document.getElementById('results');
-                results.innerHTML = '📊 Loading stats...';
-                
-                try {
-                    const response = await fetch('/api/stats');
-                    const data = await response.json();
-                    results.innerHTML = `<div class="status success">✅ Stats: ${JSON.stringify(data, null, 2)}</div>`;
-                } catch (error) {
-                    results.innerHTML = `<div class="status error">❌ Stats Error: ${error}</div>`;
-                }
-            }
-        </script>
     </body>
     </html>
-    """
+    """)
 
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
     return {
         "status": "healthy",
+        "version": "2.3",
         "timestamp": datetime.now().isoformat(),
-        "service": "Greenfield Production Inventory System v2.1",
-        "version": "v2.2-1754471211",
-        "paradigm_connected": inventory_manager.auth_token is not None
+        "service": "Greenfield Metal Sales Inventory System",
+        "environment": "production"
     }
 
 @app.get("/api/stats")
