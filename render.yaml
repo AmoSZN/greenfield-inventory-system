@@ -2,14 +2,9 @@ services:
   - type: web
     name: greenfield-inventory-system
     runtime: python
+    plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: python main.py
+    startCommand: python app.py
     envVars:
-      - key: PARADIGM_API_KEY
-        value: nVPsQFBteV&GEd7*8n0%RliVjksag8
-      - key: PARADIGM_USERNAME
-        value: web_admin
-      - key: PARADIGM_PASSWORD
-        value: ChangeMe#123!
       - key: PYTHON_VERSION
         value: 3.11.0
