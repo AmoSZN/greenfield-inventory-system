@@ -71,7 +71,7 @@ class ProductionInventoryManager:
                     try:
                         data = response.json()
                         logger.info(f"🔐 Response data: {data}")
-                        self.auth_token = data.get("token") or data.get("access_token") or data.get("accessToken")
+                        self.auth_token = data.get("token") or data.get("access_token") or data.get("accessToken") or data.get("data")
                         
                         if self.auth_token:
                             logger.info("✅ Paradigm authentication successful")
