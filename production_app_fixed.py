@@ -69,8 +69,8 @@ class ProductionInventoryManager:
             logger.error(f"❌ Authentication error: {e}")
             return False
     
-    async def get_inventory_items(self, skip: int = 0, take: int = 10000):
-        """Get inventory items from Paradigm - now retrieves ALL items"""
+    async def get_inventory_items(self, skip: int = 0, take: int = 50000):
+        """Get inventory items from Paradigm - now retrieves ALL items (30,000+)"""
         if not self.auth_token:
             if not await self.authenticate():
                 return {"error": "Authentication failed"}
@@ -82,7 +82,7 @@ class ProductionInventoryManager:
                     "X-API-Key": self.api_key
                 }
                 
-                # Use a very large take value to get ALL items
+                # Use a very large take value to get ALL items (30,000+)
                 response = await client.get(
                     f"{self.base_url}/api/Items/GetItems/{skip}/{take}",
                     headers=headers
@@ -108,7 +108,7 @@ class ProductionInventoryManager:
         
         try:
             # Get ALL items from Paradigm to find the one to update
-            items_response = await self.get_inventory_items(0, 10000)
+            items_response = await self.get_inventory_items(0, 50000)
             if "error" in items_response:
                 return items_response
             
@@ -153,7 +153,7 @@ class ProductionInventoryManager:
         """Sync Paradigm data to local database"""
         try:
             # Get items from Paradigm
-            response = await self.get_inventory_items(0, 10000) # Use a large take for sync
+            response = await self.get_inventory_items(0, 50000) # Use a large take for sync
             if "error" in response:
                 return response
             
@@ -756,6 +756,20 @@ async def main_page():
                                 <span>Unit: ${item.unit_measure || 'N/A'}</span>
                             </div>
                         </div>
+                        <div class="inventory-management" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <input type="number" 
+                                       id="qty-${item.product_id}" 
+                                       value="${item.current_quantity}" 
+                                       style="width: 80px; padding: 8px; border: 1px solid #ddd; border-radius: 5px;"
+                                       placeholder="Qty">
+                                <button onclick="updateInventory('${item.product_id}')" 
+                                        style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 12px;">
+                                    <i class="fas fa-save"></i> Update
+                                </button>
+                                <span style="font-size: 12px; color: #666;">${item.unit_measure || 'units'}</span>
+                            </div>
+                        </div>
                     </div>
                 `).join('');
                 
@@ -765,6 +779,38 @@ async def main_page():
                     </div>
                     ${resultsHtml}
                 `;
+            }
+            
+            async function updateInventory(productId) {
+                const quantityInput = document.getElementById(`qty-${productId}`);
+                const newQuantity = parseInt(quantityInput.value);
+                
+                if (isNaN(newQuantity)) {
+                    alert('Please enter a valid quantity');
+                    return;
+                }
+                
+                try {
+                    const response = await fetch('/api/paradigm/update-inventory', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({product_id: productId, quantity: newQuantity})
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        alert(`✅ Successfully updated ${productId} to quantity ${newQuantity}`);
+                        // Update the quantity badge
+                        const resultItem = quantityInput.closest('.result-item');
+                        const quantityBadge = resultItem.querySelector('.quantity-badge');
+                        quantityBadge.textContent = `${newQuantity} ${quantityBadge.textContent.split(' ')[1] || 'units'}`;
+                    } else {
+                        alert(`❌ Update failed: ${data.error}`);
+                    }
+                } catch (error) {
+                    alert(`❌ Error updating inventory: ${error.message}`);
+                }
             }
             
             // Handle Enter key in search input
@@ -778,19 +824,27 @@ async def main_page():
                 try {
                     const response = await fetch('/api/paradigm/auth');
                     const data = await response.json();
-                    alert(data.success ? '✅ Authentication successful!' : '❌ Authentication failed');
+                    if (data.success) {
+                        alert('✅ Authentication successful! Paradigm API is connected.');
+                    } else {
+                        alert('❌ Authentication failed. Please check Paradigm API credentials.');
+                    }
                 } catch (error) {
-                    alert('❌ Error testing authentication');
+                    alert('❌ Error testing authentication: ' + error.message);
                 }
             }
             
             async function getAllItems() {
                 try {
-                    const response = await fetch('/api/paradigm/items?skip=0&take=10000');
+                    const response = await fetch('/api/paradigm/items?skip=0&take=50000');
                     const data = await response.json();
-                    alert(`✅ Retrieved ${data.count} items from Paradigm`);
+                    if (data.success) {
+                        alert(`✅ Successfully retrieved ${data.count.toLocaleString()} items from Paradigm!`);
+                    } else {
+                        alert('❌ Failed to get items: ' + (data.error || 'Unknown error'));
+                    }
                 } catch (error) {
-                    alert('❌ Error getting items');
+                    alert('❌ Error getting items: ' + error.message);
                 }
             }
             
@@ -798,10 +852,14 @@ async def main_page():
                 try {
                     const response = await fetch('/api/paradigm/sync', {method: 'POST'});
                     const data = await response.json();
-                    alert(`✅ Synced ${data.items_synced} items to database`);
-                    loadStats(); // Refresh stats
+                    if (data.success) {
+                        alert(`✅ Successfully synced ${data.items_synced.toLocaleString()} items to database!`);
+                        loadStats(); // Refresh stats
+                    } else {
+                        alert('❌ Sync failed: ' + (data.error || 'Unknown error'));
+                    }
                 } catch (error) {
-                    alert('❌ Error syncing database');
+                    alert('❌ Error syncing database: ' + error.message);
                 }
             }
             
@@ -813,9 +871,13 @@ async def main_page():
                         body: JSON.stringify({product_id: 'RET4GAVLF', quantity: 999})
                     });
                     const data = await response.json();
-                    alert(data.success ? '✅ Test update successful!' : '❌ Test update failed');
+                    if (data.success) {
+                        alert('✅ Test update successful! Paradigm integration is working.');
+                    } else {
+                        alert('❌ Test update failed: ' + (data.error || 'Unknown error'));
+                    }
                 } catch (error) {
-                    alert('❌ Error testing update');
+                    alert('❌ Error testing update: ' + error.message);
                 }
             }
         </script>
@@ -890,6 +952,30 @@ async def sync_paradigm_data():
     """Sync Paradigm data to local database"""
     return await inventory_manager.sync_to_local_database()
 
+@app.post("/api/paradigm/update-inventory")
+async def update_inventory_quantity(request: Request):
+    """Update inventory quantity with better error handling"""
+    try:
+        data = await request.json()
+        product_id = data.get("product_id")
+        new_quantity = data.get("quantity")
+        
+        if not product_id or new_quantity is None:
+            raise HTTPException(status_code=400, detail="product_id and quantity required")
+        
+        # Validate quantity is a number
+        try:
+            new_quantity = int(new_quantity)
+        except ValueError:
+            return {"error": "Quantity must be a valid number"}
+        
+        result = await inventory_manager.update_item_quantity(product_id, new_quantity)
+        return result
+        
+    except Exception as e:
+        logger.error(f"Update inventory error: {e}")
+        return {"error": str(e)}
+
 @app.get("/api/search")
 async def search_inventory(q: str):
     """Search local inventory"""
@@ -920,7 +1006,7 @@ async def search_paradigm_items(q: str):
     """Search for items in Paradigm by partial name or ID"""
     try:
         # Get ALL items from Paradigm
-        response = await inventory_manager.get_inventory_items(0, 10000)
+        response = await inventory_manager.get_inventory_items(0, 50000)
         if "error" in response:
             return response
         
