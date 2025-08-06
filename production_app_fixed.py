@@ -223,7 +223,7 @@ async def main_page():
     <body>
         <div class="container">
             <h1>🏭 Greenfield Metal Sales</h1>
-            <h2>Production Inventory Management System v2.1</h2>
+            <h2>Production Inventory Management System v2.2-1754471211</h2>
             
             <div class="status success">
                 ✅ System Status: OPERATIONAL<br>
@@ -310,7 +310,7 @@ async def health_check():
         "status": "healthy",
         "timestamp": datetime.now().isoformat(),
         "service": "Greenfield Production Inventory System v2.1",
-        "version": "2.1",
+        "version": "v2.2-1754471211",
         "paradigm_connected": inventory_manager.auth_token is not None
     }
 
@@ -333,7 +333,7 @@ async def get_stats():
             "system_status": "operational",
             "paradigm_connected": inventory_manager.auth_token is not None,
             "timestamp": datetime.now().isoformat(),
-            "version": "2.1"
+            "version": "v2.2-1754471211"
         }
     except Exception as e:
         logger.error(f"Stats error: {e}")
@@ -372,7 +372,7 @@ async def test_webhook():
         "message": "Webhook endpoint is working",
         "url": "https://greenfield-inventory-system.onrender.com/paradigm-webhook",
         "instructions": "Configure this URL in Paradigm ERP webhook settings",
-        "version": "2.1"
+        "version": "v2.2-1754471211"
     }
 
 if __name__ == "__main__":

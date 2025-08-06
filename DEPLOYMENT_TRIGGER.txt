@@ -1,0 +1,9 @@
+
+# DEPLOYMENT TRIGGER - 20250806_040651
+# This file forces Render.com to rebuild the application
+
+DEPLOYMENT_TIMESTAMP = "20250806_040651"
+FORCE_REBUILD = True
+VERSION = "2.2-1754471211"
+
+# Render.com will detect this change and trigger a new deployment
