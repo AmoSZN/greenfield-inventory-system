@@ -236,253 +236,432 @@ async def startup_event():
 
 @app.get("/", response_class=HTMLResponse)
 async def main_page():
-    """Main dashboard page"""
+    """Main dashboard page - State of the Art Design"""
     return HTMLResponse("""
     <!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Greenfield Metal Sales - Production Inventory System v2.5</title>
+        <title>Greenfield Metal Sales - AI-Powered Inventory Management</title>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
         <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            
             body {
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                margin: 0;
-                padding: 20px;
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 color: #333;
                 min-height: 100vh;
-            }
-            .container {
-                max-width: 1200px;
-                margin: 0 auto;
-                background: white;
-                border-radius: 15px;
-                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-                overflow: hidden;
-            }
-            .header {
-                background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-                color: white;
-                padding: 30px;
-                text-align: center;
-            }
-            .header h1 {
-                margin: 0;
-                font-size: 2.5em;
-                font-weight: 300;
-            }
-            .header p {
-                margin: 10px 0 0 0;
-                opacity: 0.9;
-                font-size: 1.1em;
-            }
-            .content {
-                padding: 40px;
-            }
-            .status-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-                gap: 20px;
-                margin-bottom: 30px;
-            }
-            .status-card {
-                background: #f8f9fa;
-                border-radius: 10px;
-                padding: 25px;
-                border-left: 5px solid #28a745;
-                box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            }
-            .status-card h3 {
-                margin: 0 0 15px 0;
-                color: #2c3e50;
-                font-size: 1.3em;
-            }
-            .status-card p {
-                margin: 0;
-                color: #666;
                 line-height: 1.6;
             }
-            .api-section {
-                background: #f8f9fa;
-                border-radius: 10px;
-                padding: 25px;
-                margin-bottom: 20px;
+            
+            .container {
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 20px;
             }
-            .api-section h3 {
-                margin: 0 0 20px 0;
-                color: #2c3e50;
-                border-bottom: 2px solid #3498db;
-                padding-bottom: 10px;
+            
+            .header {
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                border-radius: 20px;
+                padding: 30px;
+                margin-bottom: 30px;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                text-align: center;
             }
-            .endpoint {
-                background: white;
-                border-radius: 8px;
-                padding: 15px;
-                margin-bottom: 15px;
-                border-left: 4px solid #3498db;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            
+            .header h1 {
+                font-size: 2.8em;
+                font-weight: 700;
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                margin-bottom: 10px;
             }
-            .endpoint h4 {
-                margin: 0 0 10px 0;
-                color: #2c3e50;
-                font-size: 1.1em;
-            }
-            .endpoint p {
-                margin: 0;
+            
+            .header p {
+                font-size: 1.2em;
                 color: #666;
-                font-family: 'Courier New', monospace;
-                background: #f1f3f4;
-                padding: 8px;
-                border-radius: 4px;
-                font-size: 0.9em;
+                margin-bottom: 5px;
             }
+            
             .version-badge {
                 display: inline-block;
-                background: #e74c3c;
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                color: white;
+                padding: 8px 16px;
+                border-radius: 25px;
+                font-size: 0.9em;
+                font-weight: bold;
+                margin-left: 15px;
+            }
+            
+            .main-content {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 30px;
+                margin-bottom: 30px;
+            }
+            
+            .search-section {
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                border-radius: 20px;
+                padding: 30px;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            }
+            
+            .search-section h2 {
+                font-size: 1.8em;
+                margin-bottom: 20px;
+                color: #2c3e50;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .search-container {
+                position: relative;
+                margin-bottom: 20px;
+            }
+            
+            .search-input {
+                width: 100%;
+                padding: 15px 20px;
+                padding-left: 50px;
+                border: 2px solid #e1e8ed;
+                border-radius: 15px;
+                font-size: 16px;
+                transition: all 0.3s ease;
+                background: white;
+            }
+            
+            .search-input:focus {
+                outline: none;
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
+            
+            .search-icon {
+                position: absolute;
+                left: 15px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #667eea;
+                font-size: 18px;
+            }
+            
+            .search-button {
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                color: white;
+                border: none;
+                padding: 15px 30px;
+                border-radius: 15px;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                width: 100%;
+            }
+            
+            .search-button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            }
+            
+            .results-section {
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                border-radius: 20px;
+                padding: 30px;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                max-height: 600px;
+                overflow-y: auto;
+            }
+            
+            .results-section h2 {
+                font-size: 1.8em;
+                margin-bottom: 20px;
+                color: #2c3e50;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .results-container {
+                display: none;
+            }
+            
+            .results-container.active {
+                display: block;
+            }
+            
+            .result-item {
+                background: #f8f9fa;
+                border-radius: 15px;
+                padding: 20px;
+                margin-bottom: 15px;
+                border-left: 4px solid #667eea;
+                transition: all 0.3s ease;
+            }
+            
+            .result-item:hover {
+                transform: translateX(5px);
+                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            }
+            
+            .result-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 10px;
+            }
+            
+            .product-id {
+                font-size: 1.2em;
+                font-weight: 700;
+                color: #2c3e50;
+            }
+            
+            .quantity-badge {
+                background: linear-gradient(135deg, #667eea, #764ba2);
                 color: white;
                 padding: 5px 12px;
                 border-radius: 20px;
-                font-size: 0.8em;
-                font-weight: bold;
-                margin-left: 10px;
-            }
-            .footer {
-                background: #2c3e50;
-                color: white;
-                text-align: center;
-                padding: 20px;
                 font-size: 0.9em;
+                font-weight: 600;
             }
-            .test-section {
-                background: #fff3cd;
-                border: 1px solid #ffeaa7;
-                border-radius: 10px;
-                padding: 20px;
-                margin: 20px 0;
+            
+            .product-description {
+                color: #666;
+                margin-bottom: 10px;
+                font-size: 1.1em;
             }
-            .test-button {
-                background: #007bff;
+            
+            .product-details {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                font-size: 0.9em;
+                color: #888;
+            }
+            
+            .detail-item {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }
+            
+            .loading {
+                text-align: center;
+                padding: 40px;
+                color: #667eea;
+                font-size: 1.2em;
+            }
+            
+            .no-results {
+                text-align: center;
+                padding: 40px;
+                color: #666;
+                font-size: 1.1em;
+            }
+            
+            .stats-section {
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                border-radius: 20px;
+                padding: 30px;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                margin-bottom: 30px;
+            }
+            
+            .stats-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+            }
+            
+            .stat-card {
+                background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+                border-radius: 15px;
+                padding: 25px;
+                text-align: center;
+                border-left: 4px solid #667eea;
+            }
+            
+            .stat-icon {
+                font-size: 2em;
+                color: #667eea;
+                margin-bottom: 15px;
+            }
+            
+            .stat-number {
+                font-size: 2em;
+                font-weight: 700;
+                color: #2c3e50;
+                margin-bottom: 5px;
+            }
+            
+            .stat-label {
+                color: #666;
+                font-size: 1em;
+            }
+            
+            .actions-section {
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                border-radius: 20px;
+                padding: 30px;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            }
+            
+            .actions-section h2 {
+                font-size: 1.8em;
+                margin-bottom: 20px;
+                color: #2c3e50;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .action-buttons {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 15px;
+            }
+            
+            .action-button {
+                background: linear-gradient(135deg, #667eea, #764ba2);
                 color: white;
                 border: none;
-                padding: 10px 20px;
-                border-radius: 5px;
-                cursor: pointer;
-                margin: 5px;
+                padding: 15px 20px;
+                border-radius: 15px;
                 font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
             }
-            .test-button:hover {
-                background: #0056b3;
+            
+            .action-button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
             }
-            .result {
-                margin-top: 10px;
-                padding: 10px;
-                border-radius: 5px;
-                font-family: monospace;
-                font-size: 12px;
-                max-height: 200px;
-                overflow-y: auto;
+            
+            .action-button.secondary {
+                background: linear-gradient(135deg, #6c757d, #495057);
             }
-            .success {
-                background: #d4edda;
-                color: #155724;
-                border: 1px solid #c3e6cb;
+            
+            .action-button.success {
+                background: linear-gradient(135deg, #28a745, #20c997);
             }
-            .error {
-                background: #f8d7da;
-                color: #721c24;
-                border: 1px solid #f5c6cb;
+            
+            .action-button.warning {
+                background: linear-gradient(135deg, #ffc107, #fd7e14);
+            }
+            
+            .footer {
+                text-align: center;
+                padding: 30px;
+                color: white;
+                font-size: 0.9em;
+            }
+            
+            @media (max-width: 768px) {
+                .main-content {
+                    grid-template-columns: 1fr;
+                }
+                
+                .header h1 {
+                    font-size: 2.2em;
+                }
+                
+                .stats-grid {
+                    grid-template-columns: 1fr;
+                }
             }
         </style>
     </head>
     <body>
         <div class="container">
             <div class="header">
-                <h1>🏭 Greenfield Metal Sales</h1>
-                <p>Production Inventory Management System <span class="version-badge">v2.5</span></p>
+                <h1><i class="fas fa-industry"></i> Greenfield Metal Sales</h1>
+                <p>AI-Powered Inventory Management System <span class="version-badge">v2.5</span></p>
                 <p>24/7 Cloud-Hosted with Real-Time Paradigm ERP Integration</p>
             </div>
             
-            <div class="content">
-                <div class="status-grid">
-                    <div class="status-card">
-                        <h3>✅ System Status</h3>
-                        <p>Production system is running and fully operational with all features enabled.</p>
+            <div class="stats-section">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-database"></i></div>
+                        <div class="stat-number" id="totalItems">-</div>
+                        <div class="stat-label">Total Products</div>
                     </div>
-                    <div class="status-card">
-                        <h3>🌐 Deployment</h3>
-                        <p>Successfully deployed on Render.com with continuous integration and automatic updates.</p>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-sync-alt"></i></div>
+                        <div class="stat-number" id="lastSync">-</div>
+                        <div class="stat-label">Last Sync</div>
                     </div>
-                    <div class="status-card">
-                        <h3>🔗 Paradigm Integration</h3>
-                        <p>Real-time synchronization with Paradigm ERP system for live inventory updates.</p>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-link"></i></div>
+                        <div class="stat-number" id="paradigmStatus">-</div>
+                        <div class="stat-label">Paradigm Status</div>
                     </div>
-                    <div class="status-card">
-                        <h3>📊 Database</h3>
-                        <p>SQLite database initialized with all required tables and sample inventory data.</p>
-                    </div>
-                </div>
-                
-                <div class="test-section">
-                    <h3>🧪 TEST PARADIGM INTEGRATION</h3>
-                    <p>Click the buttons below to test the Paradigm API integration:</p>
-                    <button class="test-button" onclick="testAuth()">🔐 Test Authentication</button>
-                    <button class="test-button" onclick="testGetItems()">📦 Get ALL Inventory Items</button>
-                    <button class="test-button" onclick="testSearch()">🔍 Search Products</button>
-                    <button class="test-button" onclick="testUpdateItem()">✏️ Update Item (CO4129QQ to 150)</button>
-                    <button class="test-button" onclick="testSync()">🔄 Sync to Local DB</button>
-                    <div id="testResults"></div>
-                </div>
-                
-                <div class="api-section">
-                    <h3>🔌 Available API Endpoints</h3>
-                    
-                    <div class="endpoint">
-                        <h4>Health Check</h4>
-                        <p>GET /health</p>
-                    </div>
-                    
-                    <div class="endpoint">
-                        <h4>System Statistics</h4>
-                        <p>GET /api/stats</p>
-                    </div>
-                    
-                    <div class="endpoint">
-                        <h4>Get ALL Paradigm Items</h4>
-                        <p>GET /api/paradigm/items?skip=0&take=10000</p>
-                    </div>
-                    
-                    <div class="endpoint">
-                        <h4>Search Paradigm Products</h4>
-                        <p>GET /api/paradigm/search?q={search_term}</p>
-                    </div>
-                    
-                    <div class="endpoint">
-                        <h4>Update Item Quantity</h4>
-                        <p>POST /api/paradigm/update-quantity</p>
-                    </div>
-                    
-                    <div class="endpoint">
-                        <h4>Sync to Local Database</h4>
-                        <p>POST /api/paradigm/sync</p>
-                    </div>
-                    
-                    <div class="endpoint">
-                        <h4>Search Local Inventory</h4>
-                        <p>GET /api/search?q={search_term}</p>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-server"></i></div>
+                        <div class="stat-number" id="systemStatus">-</div>
+                        <div class="stat-label">System Status</div>
                     </div>
                 </div>
+            </div>
+            
+            <div class="main-content">
+                <div class="search-section">
+                    <h2><i class="fas fa-search"></i> Search Inventory</h2>
+                    <div class="search-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" class="search-input" id="searchInput" placeholder="Search by product ID, description, or category...">
+                    </div>
+                    <button class="search-button" onclick="searchProducts()">
+                        <i class="fas fa-search"></i> Search Products
+                    </button>
+                </div>
                 
-                <div class="api-section">
-                    <h3>🚀 Key Features</h3>
-                    <ul style="color: #666; line-height: 1.8;">
-                        <li><strong>Real-time Paradigm ERP Integration:</strong> Live inventory synchronization</li>
-                        <li><strong>Advanced Search:</strong> Natural language processing for inventory queries</li>
-                        <li><strong>Webhook Support:</strong> BarTender label printing integration</li>
-                        <li><strong>24/7 Availability:</strong> Cloud-hosted with automatic scaling</li>
-                        <li><strong>Database Management:</strong> Automatic table creation and data initialization</li>
-                        <li><strong>API-First Design:</strong> RESTful endpoints for all operations</li>
-                    </ul>
+                <div class="results-section">
+                    <h2><i class="fas fa-list"></i> Search Results</h2>
+                    <div class="results-container" id="resultsContainer">
+                        <div class="no-results">
+                            <i class="fas fa-search" style="font-size: 3em; color: #ddd; margin-bottom: 20px;"></i>
+                            <p>Enter a search term to find products</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="actions-section">
+                <h2><i class="fas fa-cogs"></i> System Actions</h2>
+                <div class="action-buttons">
+                    <button class="action-button" onclick="testAuth()">
+                        <i class="fas fa-key"></i> Test Authentication
+                    </button>
+                    <button class="action-button secondary" onclick="getAllItems()">
+                        <i class="fas fa-download"></i> Get All Items
+                    </button>
+                    <button class="action-button success" onclick="syncDatabase()">
+                        <i class="fas fa-sync"></i> Sync Database
+                    </button>
+                    <button class="action-button warning" onclick="updateTestItem()">
+                        <i class="fas fa-edit"></i> Test Update
+                    </button>
                 </div>
             </div>
             
@@ -493,72 +672,150 @@ async def main_page():
         </div>
         
         <script>
-            async function testAuth() {
-                const results = document.getElementById('testResults');
-                results.innerHTML = '<div class="result">🔐 Testing authentication...</div>';
+            // Load stats on page load
+            document.addEventListener('DOMContentLoaded', function() {
+                loadStats();
+            });
+            
+            async function loadStats() {
+                try {
+                    const response = await fetch('/api/stats');
+                    const data = await response.json();
+                    
+                    if (data.total_items !== undefined) {
+                        document.getElementById('totalItems').textContent = data.total_items.toLocaleString();
+                    }
+                    
+                    if (data.last_sync) {
+                        document.getElementById('lastSync').textContent = 'Active';
+                    } else {
+                        document.getElementById('lastSync').textContent = 'Never';
+                    }
+                    
+                    document.getElementById('paradigmStatus').textContent = data.paradigm_connected ? 'Connected' : 'Disconnected';
+                    document.getElementById('systemStatus').textContent = 'Online';
+                    
+                } catch (error) {
+                    console.error('Error loading stats:', error);
+                }
+            }
+            
+            async function searchProducts() {
+                const searchTerm = document.getElementById('searchInput').value.trim();
+                if (!searchTerm) {
+                    alert('Please enter a search term');
+                    return;
+                }
                 
+                const resultsContainer = document.getElementById('resultsContainer');
+                resultsContainer.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Searching...</div>';
+                resultsContainer.classList.add('active');
+                
+                try {
+                    const response = await fetch(`/api/paradigm/search?q=${encodeURIComponent(searchTerm)}`);
+                    const data = await response.json();
+                    
+                    if (data.success && data.items && data.items.length > 0) {
+                        displayResults(data.items);
+                    } else {
+                        resultsContainer.innerHTML = `
+                            <div class="no-results">
+                                <i class="fas fa-search" style="font-size: 3em; color: #ddd; margin-bottom: 20px;"></i>
+                                <p>No products found for "${searchTerm}"</p>
+                                <p style="font-size: 0.9em; color: #999;">Try a different search term</p>
+                            </div>
+                        `;
+                    }
+                } catch (error) {
+                    resultsContainer.innerHTML = `
+                        <div class="no-results">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 3em; color: #ffc107; margin-bottom: 20px;"></i>
+                            <p>Error searching products</p>
+                            <p style="font-size: 0.9em; color: #999;">${error.message}</p>
+                        </div>
+                    `;
+                }
+            }
+            
+            function displayResults(items) {
+                const resultsContainer = document.getElementById('resultsContainer');
+                const resultsHtml = items.map(item => `
+                    <div class="result-item">
+                        <div class="result-header">
+                            <div class="product-id">${item.product_id}</div>
+                            <div class="quantity-badge">${item.current_quantity} ${item.unit_measure || 'units'}</div>
+                        </div>
+                        <div class="product-description">${item.description || 'No description available'}</div>
+                        <div class="product-details">
+                            <div class="detail-item">
+                                <i class="fas fa-tag"></i>
+                                <span>Category: ${item.category || 'N/A'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-ruler"></i>
+                                <span>Unit: ${item.unit_measure || 'N/A'}</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                resultsContainer.innerHTML = `
+                    <div style="margin-bottom: 20px; color: #667eea; font-weight: 600;">
+                        <i class="fas fa-check-circle"></i> Found ${items.length} product(s)
+                    </div>
+                    ${resultsHtml}
+                `;
+            }
+            
+            // Handle Enter key in search input
+            document.getElementById('searchInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchProducts();
+                }
+            });
+            
+            async function testAuth() {
                 try {
                     const response = await fetch('/api/paradigm/auth');
                     const data = await response.json();
-                    results.innerHTML = `<div class="result ${data.success ? 'success' : 'error'}">🔐 Auth Result: ${JSON.stringify(data, null, 2)}</div>`;
+                    alert(data.success ? '✅ Authentication successful!' : '❌ Authentication failed');
                 } catch (error) {
-                    results.innerHTML = `<div class="result error">❌ Auth Error: ${error}</div>`;
+                    alert('❌ Error testing authentication');
                 }
             }
             
-            async function testGetItems() {
-                const results = document.getElementById('testResults');
-                results.innerHTML = '<div class="result">📦 Getting ALL inventory items from Paradigm...</div>';
-                
+            async function getAllItems() {
                 try {
                     const response = await fetch('/api/paradigm/items?skip=0&take=10000');
                     const data = await response.json();
-                    results.innerHTML = `<div class="result ${data.success ? 'success' : 'error'}">📦 Items Result: Retrieved ${data.count} items from Paradigm. First 3 items: ${JSON.stringify(data.items.slice(0, 3), null, 2)}</div>`;
+                    alert(`✅ Retrieved ${data.count} items from Paradigm`);
                 } catch (error) {
-                    results.innerHTML = `<div class="result error">❌ GetItems Error: ${error}</div>`;
+                    alert('❌ Error getting items');
                 }
             }
             
-            async function testSearch() {
-                const results = document.getElementById('testResults');
-                results.innerHTML = '<div class="result">🔍 Searching for products containing "COIL"...</div>';
-                
+            async function syncDatabase() {
                 try {
-                    const response = await fetch('/api/paradigm/search?q=COIL');
+                    const response = await fetch('/api/paradigm/sync', {method: 'POST'});
                     const data = await response.json();
-                    results.innerHTML = `<div class="result ${data.success ? 'success' : 'error'}">🔍 Search Result: Found ${data.count} items containing "COIL". Items: ${JSON.stringify(data.items, null, 2)}</div>`;
+                    alert(`✅ Synced ${data.items_synced} items to database`);
+                    loadStats(); // Refresh stats
                 } catch (error) {
-                    results.innerHTML = `<div class="result error">❌ Search Error: ${error}</div>`;
+                    alert('❌ Error syncing database');
                 }
             }
             
-            async function testUpdateItem() {
-                const results = document.getElementById('testResults');
-                results.innerHTML = '<div class="result">✏️ Updating item CO4129QQ to quantity 150...</div>';
-                
+            async function updateTestItem() {
                 try {
                     const response = await fetch('/api/paradigm/update-quantity', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({product_id: 'CO4129QQ', quantity: 150})
+                        body: JSON.stringify({product_id: 'RET4GAVLF', quantity: 999})
                     });
                     const data = await response.json();
-                    results.innerHTML = `<div class="result ${data.success ? 'success' : 'error'}">✏️ Update Result: ${JSON.stringify(data, null, 2)}</div>`;
+                    alert(data.success ? '✅ Test update successful!' : '❌ Test update failed');
                 } catch (error) {
-                    results.innerHTML = `<div class="result error">❌ Update Error: ${error}</div>`;
-                }
-            }
-            
-            async function testSync() {
-                const results = document.getElementById('testResults');
-                results.innerHTML = '<div class="result">🔄 Syncing to local database...</div>';
-                
-                try {
-                    const response = await fetch('/api/paradigm/sync', {method: 'POST'});
-                    const data = await response.json();
-                    results.innerHTML = `<div class="result ${data.success ? 'success' : 'error'}">🔄 Sync Result: ${JSON.stringify(data, null, 2)}</div>`;
-                } catch (error) {
-                    results.innerHTML = `<div class="result error">❌ Sync Error: ${error}</div>`;
+                    alert('❌ Error testing update');
                 }
             }
         </script>
@@ -709,3 +966,4 @@ async def test_webhook():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
