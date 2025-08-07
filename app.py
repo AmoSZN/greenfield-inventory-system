@@ -465,6 +465,612 @@ async def update_inventory(request: Request):
     """Update inventory quantity (alias)"""
     return await update_quantity(request)
 
+@app.get("/", response_class=HTMLResponse)
+async def main_page():
+    """Main dashboard page - State of the Art Design"""
+    return HTMLResponse("""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Greenfield Metal Sales - AI Inventory Management</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .version-badge {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-icon {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .stat-number {
+            font-size: 2.2em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .search-section, .results-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        .section-title {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .search-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 15px 50px 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1.1em;
+            transition: border-color 0.3s ease;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .search-button {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+        
+        .search-button:hover {
+            opacity: 0.9;
+        }
+        
+        .results-container {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .result-item {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: transform 0.2s ease;
+        }
+        
+        .result-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .result-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .product-id {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #667eea;
+        }
+        
+        .quantity-badge {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        
+        .product-description {
+            color: #555;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .product-details {
+            display: flex;
+            gap: 20px;
+            font-size: 0.9em;
+            color: #777;
+        }
+        
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .inventory-management {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .inventory-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .quantity-input {
+            width: 80px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .update-button {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: opacity 0.3s ease;
+        }
+        
+        .update-button:hover {
+            opacity: 0.9;
+        }
+        
+        .actions-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .action-button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .action-button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .footer {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 40px;
+            padding: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-section {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-industry"></i> Greenfield Metal Sales</h1>
+            <p>AI-Powered Inventory Management System <span class="version-badge">v3.0</span></p>
+            <p>24/7 Cloud-Hosted with Background Sync & Instant Search</p>
+        </div>
+        
+        <div class="stats-section">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-database"></i></div>
+                <div class="stat-number" id="totalItems">Loading...</div>
+                <div class="stat-label">Total Products</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-sync-alt"></i></div>
+                <div class="stat-number" id="lastSync">Loading...</div>
+                <div class="stat-label">Last Sync</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-link"></i></div>
+                <div class="stat-number" id="paradigmStatus">Loading...</div>
+                <div class="stat-label">Paradigm Status</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-server"></i></div>
+                <div class="stat-number" id="systemStatus">Loading...</div>
+                <div class="stat-label">System Status</div>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="search-section">
+                <h2 class="section-title"><i class="fas fa-search"></i> Search Inventory</h2>
+                <div class="search-container">
+                    <input type="text" class="search-input" id="searchInput" placeholder="Search by product ID, description, or category..." onkeypress="handleSearchKeyPress(event)">
+                    <button class="search-button" onclick="searchProducts()"><i class="fas fa-search"></i> Search Products</button>
+                </div>
+            </div>
+            
+            <div class="results-section">
+                <h2 class="section-title"><i class="fas fa-list"></i> Search Results</h2>
+                <div class="results-container" id="resultsContainer">
+                    <p style="text-align: center; color: #666; margin-top: 50px;">
+                        <i class="fas fa-search" style="font-size: 3em; margin-bottom: 20px; opacity: 0.3;"></i><br>
+                        Enter a search term to find products
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="actions-section">
+            <h2 class="section-title"><i class="fas fa-cogs"></i> System Actions</h2>
+            <div class="actions-grid">
+                <button class="action-button" onclick="testAuth()">
+                    <i class="fas fa-key"></i> Test Authentication
+                </button>
+                <button class="action-button" onclick="getAllItems()">
+                    <i class="fas fa-download"></i> Get All Items
+                </button>
+                <button class="action-button" onclick="syncDatabase()">
+                    <i class="fas fa-sync"></i> Sync Database
+                </button>
+                <button class="action-button" onclick="updateTestItem()">
+                    <i class="fas fa-edit"></i> Test Update
+                </button>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2025 Greenfield Metal Sales - AI-Powered Inventory Management System</p>
+            <p>Built with FastAPI, SQLite, and Paradigm ERP Integration</p>
+        </div>
+    </div>
+
+    <script>
+        // Load stats on page load
+        window.onload = function() {
+            loadStats();
+        };
+        
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const data = await response.json();
+                
+                if (data.total_items !== undefined) {
+                    document.getElementById('totalItems').textContent = data.total_items.toLocaleString();
+                }
+                
+                if (data.last_sync) {
+                    const lastSync = new Date(data.last_sync);
+                    const timeAgo = getTimeAgo(lastSync);
+                    document.getElementById('lastSync').textContent = timeAgo;
+                } else {
+                    document.getElementById('lastSync').textContent = 'Never';
+                }
+                
+                document.getElementById('paradigmStatus').textContent = data.paradigm_connected ? 'Connected' : 'Disconnected';
+                document.getElementById('systemStatus').textContent = 'Online';
+                
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+        
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+            
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHours < 24) return `${diffHours}h ago`;
+            return `${diffDays}d ago`;
+        }
+        
+        async function searchProducts() {
+            const searchTerm = document.getElementById('searchInput').value.trim();
+            const resultsContainer = document.getElementById('resultsContainer');
+            
+            if (!searchTerm) {
+                resultsContainer.innerHTML = '<p style="text-align: center; color: #666;">Please enter a search term</p>';
+                return;
+            }
+            
+            resultsContainer.innerHTML = '<p style="text-align: center; color: #666;"><i class="fas fa-spinner fa-spin"></i> Searching...</p>';
+            
+            try {
+                const response = await fetch(`/api/search?q=${encodeURIComponent(searchTerm)}&limit=50`);
+                const data = await response.json();
+                
+                if (data.success && data.items.length > 0) {
+                    displayResults(data.items);
+                } else {
+                    resultsContainer.innerHTML = `<p style="text-align: center; color: #666;">No results found for "${searchTerm}"</p>`;
+                }
+            } catch (error) {
+                resultsContainer.innerHTML = '<p style="text-align: center; color: #dc3545;">Error searching products</p>';
+                console.error('Search error:', error);
+            }
+        }
+        
+        function displayResults(items) {
+            const resultsContainer = document.getElementById('resultsContainer');
+            const resultsHtml = items.map(item => `
+                <div class="result-item">
+                    <div class="result-header">
+                        <div class="product-id">${item.product_id}</div>
+                        <div class="quantity-badge">${item.current_quantity} ${item.unit_measure || 'units'}</div>
+                    </div>
+                    <div class="product-description">${item.description || 'No description available'}</div>
+                    <div class="product-details">
+                        <div class="detail-item">
+                            <i class="fas fa-tag"></i>
+                            <span>Category: ${item.category || 'N/A'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-dollar-sign"></i>
+                            <span>Price: $${item.sales_price || '0.00'}</span>
+                        </div>
+                    </div>
+                    <div class="inventory-management">
+                        <div class="inventory-controls">
+                            <input type="number" 
+                                   id="qty-${item.product_id}" 
+                                   value="${item.current_quantity}" 
+                                   class="quantity-input"
+                                   placeholder="Qty">
+                            <button onclick="updateInventory('${item.product_id}')" class="update-button">
+                                <i class="fas fa-save"></i> Update
+                            </button>
+                            <span style="font-size: 12px; color: #666;">${item.unit_measure || 'units'}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            resultsContainer.innerHTML = `
+                <div style="margin-bottom: 20px; color: #667eea; font-weight: 600;">
+                    <i class="fas fa-check-circle"></i> Found ${items.length} product(s)
+                </div>
+                ${resultsHtml}
+            `;
+        }
+        
+        async function updateInventory(productId) {
+            const quantityInput = document.getElementById(`qty-${productId}`);
+            const newQuantity = parseFloat(quantityInput.value);
+            
+            if (isNaN(newQuantity)) {
+                alert('Please enter a valid quantity');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/paradigm/update-quantity', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({product_id: productId, quantity: newQuantity})
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(`✅ Successfully updated ${productId} to quantity ${newQuantity}`);
+                    // Update the quantity badge
+                    const resultItem = quantityInput.closest('.result-item');
+                    const quantityBadge = resultItem.querySelector('.quantity-badge');
+                    const unitText = quantityBadge.textContent.split(' ').slice(1).join(' ');
+                    quantityBadge.textContent = `${newQuantity} ${unitText}`;
+                } else {
+                    alert(`❌ Update failed: ${data.error}`);
+                }
+            } catch (error) {
+                alert(`❌ Error updating inventory: ${error.message}`);
+            }
+        }
+        
+        function handleSearchKeyPress(event) {
+            if (event.key === 'Enter') {
+                searchProducts();
+            }
+        }
+        
+        // System action functions
+        async function testAuth() {
+            try {
+                const response = await fetch('/api/paradigm/auth');
+                const data = await response.json();
+                if (data.success) {
+                    alert('✅ Authentication successful! Paradigm API is connected.');
+                } else {
+                    alert('❌ Authentication failed. Please check Paradigm API credentials.');
+                }
+            } catch (error) {
+                alert('❌ Error testing authentication: ' + error.message);
+            }
+        }
+        
+        async function getAllItems() {
+            try {
+                const response = await fetch('/api/paradigm/items?skip=0&take=100');
+                const data = await response.json();
+                if (data.success) {
+                    alert(`✅ Successfully retrieved ${data.count.toLocaleString()} items from Paradigm!\\n\\n📊 System now has all items available for instant search.\\n🔄 Background sync runs automatically.`);
+                } else {
+                    alert('❌ Failed to get items: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('❌ Error getting items: ' + error.message);
+            }
+        }
+        
+        async function syncDatabase() {
+            try {
+                const response = await fetch('/api/paradigm/sync', {method: 'POST'});
+                const data = await response.json();
+                if (data.success) {
+                    alert(`✅ Successfully synced ${data.items_synced.toLocaleString()} items to database!\\n\\n🔄 Background sync will continue automatically.\\n⚡ Search is now instant using local data.`);
+                    loadStats(); // Refresh stats
+                } else {
+                    alert('❌ Sync failed: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('❌ Error syncing database: ' + error.message);
+            }
+        }
+        
+        async function updateTestItem() {
+            try {
+                const response = await fetch('/api/paradigm/update-quantity', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({product_id: 'BEND', quantity: 999})
+                });
+                const data = await response.json();
+                if (data.success) {
+                    alert('✅ Test update successful! Paradigm integration is working.');
+                } else {
+                    alert('❌ Test update failed: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('❌ Error testing update: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
+    """)
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 8000)))
