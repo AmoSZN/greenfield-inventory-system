@@ -297,8 +297,15 @@ class StateOfTheArtInventoryManager:
             if not current_item:
                 return {"success": False, "error": f"Item {product_id} not found"}
             
-            # Update the quantity
+            # Update the quantity and set proper Paradigm flags
             current_item["decUnitsInStock"] = new_quantity
+            
+            # Reset committed units to prevent double-counting
+            current_item["decUnitsCommitted"] = 0.0
+            
+            # Set Paradigm flags for proper inventory tracking
+            current_item["ysnUpdateUnitsCommitted"] = False
+            current_item["ysnUpdateUnitsPulled"] = False
             
             # Update in Paradigm
             async with httpx.AsyncClient(timeout=30.0) as client:
